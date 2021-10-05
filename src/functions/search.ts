@@ -2,9 +2,9 @@ import { Util } from '../util/Util';
 import { getSearchInfo } from './getSearchInfo';
 
 enum SearchType {
-    'video' = 'EgIQAQ%3D%3D',
-    'playlist' = 'EgIQAw%3D%3D',
-    'channel' = 'EgIQAg%3D%3D'
+    video = 'EgIQAQ%3D%3D',
+    playlist = 'EgIQAw%3D%3D',
+    channel = 'EgIQAg%3D%3D'
 }
 
 export interface SearchOption {

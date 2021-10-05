@@ -1,13 +1,13 @@
 import axios from 'axios';
-import Miniget from 'miniget';
+import miniget from 'miniget';
 import m3u8stream from 'm3u8stream';
-import { parse } from 'querystring';
-import * as Regexes from '../util/Regexes';
+import { parse as queryParse } from 'querystring';
+import { Regexes } from '../util/Regexes';
 import { Util } from '../util/Util';
 import { PassThrough } from 'stream';
-import { cachedTokens } from '../util/cache';
 import { download } from '../functions/download';
 import { decipher, extractTokens } from '../util/decipher';
+const cachedTokens: Map<string, string[]> = new Map();
 
 export interface YoutubeVideoDetails {
     url: string;
@@ -84,7 +84,6 @@ export interface DownloadOptions {
     highWaterMark?: number;
     resource?: PassThrough;
     begin?: number | string;
-    pipe?: boolean;
 }
 
 export class YoutubeVideo {
@@ -143,7 +142,7 @@ export class YoutubeVideo {
             }
 
             if (!frmt.url) {
-                frmt = { ...frmt, ...parse(frmt.signatureCipher as string) };
+                frmt = { ...frmt, ...queryParse(frmt.signatureCipher as string) };
             }
 
             const url = new URL(decodeURIComponent(frmt.url as string));
@@ -181,27 +180,22 @@ export class YoutubeVideo {
                 const stream =
                     options.resource ??
                     new PassThrough({
-                        // Set watermark to 64KB (default) for chunking.
                         highWaterMark: options.highWaterMark ?? 64 * 1024
                     });
 
                 const downloadChunkSize = options.chunkMode.chunkSize ?? 256 * 1024;
 
-                let endBytes = downloadChunkSize,
-                    startBytes = 0;
-
-                const pipelike = options.pipe ?? true;
+                let startBytes = 0,
+                    endBytes = downloadChunkSize;
 
                 let awaitDrain: (() => void) | null;
 
-                let request: Miniget.Stream | null;
+                let request: miniget.Stream | null;
 
-                if (pipelike) {
-                    stream.on('drain', () => {
-                        awaitDrain?.();
-                        awaitDrain = null;
-                    });
-                }
+                stream.on('drain', () => {
+                    awaitDrain?.();
+                    awaitDrain = null;
+                });
 
                 stream.once('close', () => {
                     request?.destroy();
@@ -213,16 +207,16 @@ export class YoutubeVideo {
                     if (endBytes > (format.contentLength as number)) {
                         endBytes = format.contentLength as number;
                     }
-                    request = Miniget(format.url as string, {
+                    request = miniget(format.url as string, {
                         headers: {
                             Range: `bytes=${startBytes}-${endBytes}`
                         }
                     });
 
-                    // Handle unknown 403 errors accordinly.
                     request.once('error', (error) => {
                         request?.destroy();
                         if (error.message.includes('403')) {
+                            // Retry download when error is 403 error.
                             request?.removeAllListeners();
                             request = null;
                             options.resource = stream;
@@ -239,13 +233,9 @@ export class YoutubeVideo {
                         }
                         startBytes += chunk.length;
 
-                        if (pipelike) {
-                            if (!stream.write(chunk)) {
-                                request?.pause();
-                                awaitDrain = () => request?.resume();
-                            }
-                        } else {
-                            stream.write(chunk);
+                        if (!stream.write(chunk)) {
+                            request?.pause();
+                            awaitDrain = () => request?.resume();
                         }
                     });
 
@@ -264,7 +254,7 @@ export class YoutubeVideo {
             } else {
                 const stream = new PassThrough({ highWaterMark: format.contentLength });
 
-                const request = Miniget(format.url as string);
+                const request = miniget(format.url as string);
 
                 stream.once('close', () => {
                     request.destroy();
@@ -275,6 +265,7 @@ export class YoutubeVideo {
                 request.once('error', (error) => {
                     request.destroy();
                     if (error.message.includes('403')) {
+                        // Retry download when error is 403 error.
                         request.unpipe(stream);
                         request.removeAllListeners();
                         options.resource = stream;

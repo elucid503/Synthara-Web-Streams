@@ -5,11 +5,13 @@ import { ErrorCodes } from '../util/constants';
  * Downloads a youtube stream using its YoutubeVideo class.
  * @param video The YoutubeVideo class of the song to download its stream.
  * @param format The format to use for the song.
+ * @param options The options to use for the song.
  * @returns
  */
 export function downloadFromVideo(video: YoutubeVideo, format?: YoutubeVideoFormat, options?: DownloadOptions) {
     if (!format) {
-        const videoOrAudio = video.formats.filter((c) => c.hasVideo || c.hasAudio);
+        // This format is downloadable.
+        const videoOrAudio = video.formats.filter((c) => (c.hasVideo || c.hasAudio) && c.contentLength);
         format = videoOrAudio[videoOrAudio.length - 1];
     }
 

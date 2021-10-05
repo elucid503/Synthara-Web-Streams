@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as Regexes from '../util/Regexes';
+import { Regexes } from '../util/Regexes';
 import { Util } from '../util/Util';
 import { TypeError } from './TypeError';
 import { DEFAULT_CONTEXT, ErrorCodes } from '../util/constants';
@@ -65,7 +65,7 @@ export class YoutubePlaylist {
             }
         }
 
-        const { data: json } = await axios.post(`${Util.getYTApiBaseURL()}/browse?key=${this.apiKey}`, {
+        const { data: json } = await axios.post<any>(`${Util.getYTApiBaseURL()}/browse?key=${this.apiKey}`, {
             context: this.context,
             continuation: this.token
         });
@@ -171,13 +171,13 @@ export class YoutubePlaylist {
                 this.tracks.push({
                     url: `${Util.getYTVideoURL()}${track.videoId}`,
                     id: track.videoId,
-                    index: Number(track.index.simpleText),
-                    formattedDuration: track.lengthText.simpleText,
-                    formattedReadableDuration: track.lengthText.accessibility.accessibilityData.label,
+                    index: Number(track.index?.simpleText),
+                    formattedDuration: track.lengthText?.simpleText,
+                    formattedReadableDuration: track.lengthText?.accessibility.accessibilityData.label,
                     duration: Number(track.lengthSeconds) * 1000,
                     isPlayable: track.isPlayable,
                     thumbnails: track.thumbnail?.thumbnails ?? [],
-                    title: track.title.runs[0].text
+                    title: track.title?.runs?.[0].text
                 });
             }
         }

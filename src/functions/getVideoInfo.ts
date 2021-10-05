@@ -1,12 +1,16 @@
 import axios from 'axios';
 import { YoutubeVideo } from '../structures/YoutubeVideo';
-import * as Regexes from '../util/Regexes';
+import { Regexes } from '../util/Regexes';
 import { Util } from '../util/Util';
+import { ErrorCodes } from '../util/constants';
 
-export async function getVideoInfo(urlOrId: string, getPlaylistFormats: boolean = false) {
-    const id = Util.getId(urlOrId);
+export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = false) {
+    const videoId = Util.getVideoId(urlOrId);
+    if (!videoId) {
+        throw new Error(ErrorCodes.INVALID_URL);
+    }
 
-    const { data } = await axios.get<string>(`${Util.getYTVideoURL()}${id}&hl=en`);
+    const { data } = await axios.get<string>(`${Util.getYTVideoURL()}${videoId}&hl=en`);
 
     const json = JSON.parse((Regexes.YOUTUBE_PLAYER_RESPONSE.exec(data) as RegExpExecArray)[1]);
 
@@ -22,7 +26,7 @@ export async function getVideoInfo(urlOrId: string, getPlaylistFormats: boolean 
     const dashMpdUrl = json.streamingData?.dashManifestUrl;
     const m3u8Url = json.streamingData?.hlsManifestUrl;
 
-    if (getPlaylistFormats) {
+    if (getLiveFormats) {
         video.moreFormats = [];
         const pending: Promise<typeof video.moreFormats>[] = [];
         if (dashMpdUrl) {

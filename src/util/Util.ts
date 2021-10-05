@@ -2,10 +2,12 @@ import { YoutubeVideoFormat } from '../structures/YoutubeVideo';
 import { parse as xmlParse } from 'fast-xml-parser';
 import { formats } from './formats';
 import axios from 'axios';
+const videoRegex = /^[\w-]{11}$/;
+const listRegex = /^[\w-]{12,}$/;
+const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts)\/)/;
+const validQueryDomains = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com'];
 
-export class Util extends null {
-    constructor() {}
-
+export class Util {
     static getBaseYTURL() {
         return 'https://www.youtube.com';
     }
@@ -38,24 +40,36 @@ export class Util extends null {
         return 'https://www.youtube.com/youtubei/v1';
     }
 
-    static getId(str: string) {
-        return str.includes('/v/')
-            ? str.split('/v/')[1].split('&')[0]
-            : str.includes('youtube.com/embed/')
-            ? str.split('embed/')[1].split('&')[0]
-            : str.includes('youtu.be/') && !str.includes('/v/')
-            ? str.split('youtu.be/')[1].split('&')[0]
-            : str.includes('watch?v=')
-            ? str.split('watch?v=')[1].split('&')[0]
-            : str;
+    static getVideoId(urlOrId: string): string | null {
+        try {
+            if (videoRegex.test(urlOrId)) {
+                return urlOrId;
+            }
+            const parsed = new URL(urlOrId);
+            let id = parsed.searchParams.get('v');
+            if (validPathDomains.test(urlOrId) && !id) {
+                const paths = parsed.pathname.split('/');
+                id = paths[parsed.hostname === 'youtu.be' ? 1 : 2].substring(0, 11);
+            } else if (!validQueryDomains.includes(parsed.hostname)) {
+                return null;
+            }
+            return videoRegex.test(id ?? '') ? id : null;
+        } catch {
+            return null;
+        }
     }
 
-    static getListId(str: string) {
-        return str.includes('&list=')
-            ? str.split('&list=')[1].split('&')[0]
-            : str.includes('?list=')
-            ? str.split('?list=')[1].split('&')[0]
-            : str;
+    static getListId(urlOrId: string): string | null {
+        try {
+            if (listRegex.test(urlOrId)) {
+                return urlOrId;
+            }
+            const parsed = new URL(urlOrId);
+            const id = parsed.searchParams.get('list');
+            return validQueryDomains.includes(parsed.hostname) && listRegex.test(id ?? '') ? id : null;
+        } catch {
+            return null;
+        }
     }
 
     static addMetadataToFormat(format: YoutubeVideoFormat): YoutubeVideoFormat {

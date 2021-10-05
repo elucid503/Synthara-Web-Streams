@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { YoutubeTrending } from '../structures/YoutubeTrending';
-import * as Regexes from '../util/Regexes';
+import { Regexes } from '../util/Regexes';
 import { Util } from '../util/Util';
 
 export async function getYoutubeTrending() {

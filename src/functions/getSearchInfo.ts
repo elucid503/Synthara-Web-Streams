@@ -2,7 +2,7 @@ import axios from 'axios';
 import { SearchError } from '../structures/SearchError';
 import { YoutubeSearchResults } from '../structures/YoutubeSearchResults';
 import { ErrorCodes } from '../util/constants';
-import * as Regexes from '../util/Regexes';
+import { Regexes } from '../util/Regexes';
 
 export async function getSearchInfo(url: string, limit: number) {
     const request = await axios.get<string>(url).catch(() => {});
@@ -15,7 +15,7 @@ export async function getSearchInfo(url: string, limit: number) {
         const json = JSON.parse((Regexes.YOUTUBE_INITIAL_DATA.exec(request.data) as RegExpExecArray)[1]);
 
         return new YoutubeSearchResults(json, limit);
-    } catch (error: any) {
-        throw new SearchError(error.message);
+    } catch (error) {
+        throw new SearchError((error as Error).message);
     }
 }

@@ -35,7 +35,7 @@ export class YoutubeTrending {
         this.json = json;
     }
 
-    get videos(): YoutubeTrendingVideo[] {
+    get results(): YoutubeTrendingVideo[] {
         const arr: YoutubeTrendingVideo[] = [];
 
         for (const data of this.json) {

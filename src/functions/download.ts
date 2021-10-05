@@ -6,6 +6,7 @@ import { getVideoInfo } from './getVideoInfo';
  * Downloads a youtube stream using its url or id.
  * @param urlOrId The url or id of the song to download its stream.
  * @param format The format to use for the song.
+ * @param options The options to use for the song.
  */
 export async function download(urlOrId: string, format?: YoutubeVideoFormat, options?: DownloadOptions) {
     const video = await getVideoInfo(urlOrId, true);

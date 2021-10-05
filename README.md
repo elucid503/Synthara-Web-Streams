@@ -11,7 +11,7 @@
 - [GitHub Repository](https://github.com/cjh980402/youtube-dlsr)
 
 ### Installing
-`npm i youtube-dlsr`
+`npm install youtube-dlsr`
 
 ### Example
 ```js

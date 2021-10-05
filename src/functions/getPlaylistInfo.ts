@@ -1,5 +1,6 @@
 import { YoutubePlaylist } from '../structures/YoutubePlaylist';
 import { Util } from '../util/Util';
+import { ErrorCodes } from '../util/constants';
 
 export interface GetPlaylistInfoOptions {
     full?: boolean;
@@ -7,6 +8,9 @@ export interface GetPlaylistInfoOptions {
 
 export async function getPlaylistInfo(urlOrId: string, options: GetPlaylistInfoOptions = {}): Promise<YoutubePlaylist> {
     const listId = Util.getListId(urlOrId);
+    if (!listId) {
+        throw new Error(ErrorCodes.INVALID_URL);
+    }
 
     const playlist = new YoutubePlaylist(listId);
 
