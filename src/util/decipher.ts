@@ -66,20 +66,28 @@ export const extractTokens = (body: string): string[] | null => {
     const objBody = objResult[2].replace(/\$/g, '\\$');
     const funcBody = funcResult[1].replace(/\$/g, '\\$');
 
-    let result = reverseRegexp.exec(objBody);
-    const reverseKey = result?.[1].replace(/\$/g, '\\$').replace(/\$|^'|^"|'$|"$/g, '');
-    result = sliceRegexp.exec(objBody);
-    const sliceKey = result?.[1].replace(/\$/g, '\\$').replace(/\$|^'|^"|'$|"$/g, '');
-    result = spliceRegexp.exec(objBody);
-    const spliceKey = result?.[1].replace(/\$/g, '\\$').replace(/\$|^'|^"|'$|"$/g, '');
-    result = swapRegexp.exec(objBody);
-    const swapKey = result?.[1].replace(/\$/g, '\\$').replace(/\$|^'|^"|'$|"$/g, '');
+    const reverseKey = reverseRegexp
+        .exec(objBody)?.[1]
+        .replace(/\$/g, '\\$')
+        .replace(/\$|^'|^"|'$|"$/g, '');
+    const sliceKey = sliceRegexp
+        .exec(objBody)?.[1]
+        .replace(/\$/g, '\\$')
+        .replace(/\$|^'|^"|'$|"$/g, '');
+    const spliceKey = spliceRegexp
+        .exec(objBody)?.[1]
+        .replace(/\$/g, '\\$')
+        .replace(/\$|^'|^"|'$|"$/g, '');
+    const swapKey = swapRegexp
+        .exec(objBody)?.[1]
+        .replace(/\$/g, '\\$')
+        .replace(/\$|^'|^"|'$|"$/g, '');
 
     const keys = `(${[reverseKey, sliceKey, spliceKey, swapKey].join('|')})`;
     const myreg = `(?:a=)?${obj}(?:\\.${keys}|\\['${keys}'\\]|\\["${keys}"\\])` + `\\(a,(\\d+)\\)`;
     const tokenizeRegexp = new RegExp(myreg, 'g');
     const tokens: string[] = [];
-    while ((result = tokenizeRegexp.exec(funcBody)) !== null) {
+    for (const result of funcBody.matchAll(tokenizeRegexp)) {
         const key = result[1] || result[2] || result[3];
         switch (key) {
             case swapKey:

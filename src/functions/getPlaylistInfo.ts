@@ -1,6 +1,6 @@
 import { YoutubePlaylist } from '../structures/YoutubePlaylist';
-import { Util } from '../util/Util';
 import { ErrorCodes } from '../util/constants';
+import { Util } from '../util/Util';
 
 export interface GetPlaylistInfoOptions {
     full?: boolean;

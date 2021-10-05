@@ -2,11 +2,11 @@ import axios from 'axios';
 import miniget from 'miniget';
 import m3u8stream from 'm3u8stream';
 import { parse as queryParse } from 'querystring';
-import { Regexes } from '../util/Regexes';
-import { Util } from '../util/Util';
 import { PassThrough } from 'stream';
 import { download } from '../functions/download';
 import { decipher, extractTokens } from '../util/decipher';
+import { Regexes } from '../util/Regexes';
+import { Util } from '../util/Util';
 const cachedTokens: Map<string, string[]> = new Map();
 
 export interface YoutubeVideoDetails {
@@ -89,7 +89,7 @@ export interface DownloadOptions {
 export class YoutubeVideo {
     private json: any;
 
-    moreFormats?: YoutubeVideoFormat[];
+    liveFormats?: YoutubeVideoFormat[];
     html5Player?: string;
     tokens?: string[];
 
@@ -102,7 +102,7 @@ export class YoutubeVideo {
     }
 
     get formats(): YoutubeVideoFormat[] {
-        const arr = [...(this.moreFormats ?? [])];
+        const arr = [...(this.liveFormats ?? [])];
 
         for (const format of [
             ...(this.json.streamingData?.adaptiveFormats ?? []),

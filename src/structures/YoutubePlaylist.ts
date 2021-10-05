@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { Regexes } from '../util/Regexes';
-import { Util } from '../util/Util';
 import { TypeError } from './TypeError';
 import { DEFAULT_CONTEXT, ErrorCodes } from '../util/constants';
+import { Regexes } from '../util/Regexes';
+import { Util } from '../util/Util';
 
 export interface PlaylistVideo {
     id: string;

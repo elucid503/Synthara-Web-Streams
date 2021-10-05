@@ -1,6 +1,6 @@
-import { DownloadOptions, YoutubeVideoFormat } from '../structures/YoutubeVideo';
 import { downloadFromVideo } from './downloadFromVideo';
 import { getVideoInfo } from './getVideoInfo';
+import { DownloadOptions, YoutubeVideoFormat } from '../structures/YoutubeVideo';
 
 /**
  * Downloads a youtube stream using its url or id.

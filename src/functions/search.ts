@@ -1,5 +1,5 @@
-import { Util } from '../util/Util';
 import { getSearchInfo } from './getSearchInfo';
+import { Util } from '../util/Util';
 
 enum SearchType {
     video = 'EgIQAQ%3D%3D',

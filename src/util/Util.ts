@@ -1,7 +1,7 @@
-import { YoutubeVideoFormat } from '../structures/YoutubeVideo';
-import { parse as xmlParse } from 'fast-xml-parser';
-import { formats } from './formats';
 import axios from 'axios';
+import { parse as xmlParse } from 'fast-xml-parser';
+import { YoutubeVideoFormat } from '../structures/YoutubeVideo';
+import { formats } from './formats';
 const videoRegex = /^[\w-]{11}$/;
 const listRegex = /^[\w-]{12,}$/;
 const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts)\/)/;
@@ -83,7 +83,7 @@ export class Util {
     }
 
     static async dashMpdFormat(url: string): Promise<YoutubeVideoFormat[]> {
-        const moreFormats: YoutubeVideoFormat[] = [];
+        const liveFormats: YoutubeVideoFormat[] = [];
         try {
             const { data } = await axios.get<string>(new URL(url, Util.getYTVideoURL()).toString());
             const xml = xmlParse(data, {
@@ -111,16 +111,16 @@ export class Util {
                             format.fps = Number(representation['$frameRate']);
                         }
 
-                        moreFormats.push(Util.addMetadataToFormat(format));
+                        liveFormats.push(Util.addMetadataToFormat(format));
                     }
                 }
             }
         } catch {}
-        return moreFormats;
+        return liveFormats;
     }
 
     static async m3u8Format(url: string): Promise<YoutubeVideoFormat[]> {
-        const moreFormats: YoutubeVideoFormat[] = [];
+        const liveFormats: YoutubeVideoFormat[] = [];
         try {
             const { data } = await axios.get<string>(new URL(url, Util.getYTVideoURL()).toString());
 
@@ -129,7 +129,7 @@ export class Util {
                     continue;
                 }
 
-                const itag = Number(line.match(/\/itag\/(\d+)\//)?.[1]) as keyof typeof formats;
+                const itag = Number(/\/itag\/(\d+)\//.exec(line)?.[1]) as keyof typeof formats;
                 const reservedFormat = formats[itag];
 
                 if (reservedFormat) {
@@ -141,10 +141,10 @@ export class Util {
                         codec: reservedFormat.mimeType.split('"')[1]
                     };
 
-                    moreFormats.push(Util.addMetadataToFormat(format));
+                    liveFormats.push(Util.addMetadataToFormat(format));
                 }
             }
         } catch {}
-        return moreFormats;
+        return liveFormats;
     }
 }
