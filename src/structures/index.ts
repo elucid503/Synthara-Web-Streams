@@ -1,4 +1,3 @@
-export * from './Manager';
 export * from './SearchError';
 export * from './TypeError';
 export * from './YoutubeChannel';
