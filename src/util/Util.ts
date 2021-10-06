@@ -7,7 +7,7 @@ const listRegex = /^[\w-]{12,}$/;
 const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts)\/)/;
 const validQueryDomains = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com'];
 
-export class Util {
+export class Util extends null {
     static getBaseYTURL() {
         return 'https://www.youtube.com';
     }
@@ -83,7 +83,7 @@ export class Util {
     }
 
     static async dashMpdFormat(url: string): Promise<YoutubeVideoFormat[]> {
-        const liveFormats: YoutubeVideoFormat[] = [];
+        const dashFormats: YoutubeVideoFormat[] = [];
         try {
             const { data } = await axios.get<string>(new URL(url, Util.getYTVideoURL()).toString());
             const xml = xmlParse(data, {
@@ -111,16 +111,16 @@ export class Util {
                             format.fps = Number(representation['$frameRate']);
                         }
 
-                        liveFormats.push(Util.addMetadataToFormat(format));
+                        dashFormats.push(Util.addMetadataToFormat(format));
                     }
                 }
             }
         } catch {}
-        return liveFormats;
+        return dashFormats;
     }
 
     static async m3u8Format(url: string): Promise<YoutubeVideoFormat[]> {
-        const liveFormats: YoutubeVideoFormat[] = [];
+        const hlsFormats: YoutubeVideoFormat[] = [];
         try {
             const { data } = await axios.get<string>(new URL(url, Util.getYTVideoURL()).toString());
 
@@ -141,10 +141,10 @@ export class Util {
                         codec: reservedFormat.mimeType.split('"')[1]
                     };
 
-                    liveFormats.push(Util.addMetadataToFormat(format));
+                    hlsFormats.push(Util.addMetadataToFormat(format));
                 }
             }
         } catch {}
-        return liveFormats;
+        return hlsFormats;
     }
 }

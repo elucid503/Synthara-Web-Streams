@@ -10,12 +10,15 @@
 
 ### Example
 ```js
-const { download } = require('youtube-dlsr');
+const { download, search } = require('youtube-dlsr');
 const { createWriteStream } = require('fs');
 
 (async () => {
+    // Search video.
+    const result = await search('no copyright music', { type: 'video' });
+    // Get stream of video.
+    const stream = await download(result[0].url);
     // Write to file.
-    const stream = await download('https://www.youtube.com/watch?v=G6Tv8eFu7zA');
-    stream.pipe(createWriteStream('./G6Tv8eFu7zA.ogg'));
+    stream.pipe(createWriteStream('./no_copyright_music.ogg'));
 })();
 ```

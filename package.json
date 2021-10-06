@@ -1,6 +1,6 @@
 {
   "name": "youtube-dlsr",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Simply used for youtube stream and search.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

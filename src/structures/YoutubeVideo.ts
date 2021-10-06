@@ -165,7 +165,7 @@ export class YoutubeVideo {
         if (format.isHLS || format.isDashMPD) {
             return m3u8stream(format.url as string, {
                 id: String(format.itag),
-                parser: format.isDashMPD ? 'dash-mpd' : 'm3u8',
+                parser: format.isHLS ? 'm3u8' : 'dash-mpd',
                 highWaterMark: options.highWaterMark ?? 64 * 1024,
                 begin: options.begin ?? (format.isLive ? Date.now() : 0),
                 liveBuffer: 4000,
@@ -301,7 +301,7 @@ export class YoutubeVideo {
     async fetchTokens() {
         if (cachedTokens.has(this.html5Player as string) || this.tokens) {
             this.tokens = cachedTokens.get(this.html5Player as string) ?? this.tokens;
-            return cachedTokens.get(this.html5Player as string) ?? this.tokens;
+            return this.tokens;
         }
 
         const { data } = await axios.get<string>(this.html5Player as string);

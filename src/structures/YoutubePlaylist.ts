@@ -43,12 +43,12 @@ export class YoutubePlaylist {
         return this.data?.name ?? '';
     }
 
-    allLoaded() {
-        return Boolean(this.token);
-    }
-
     get description() {
         return this.data?.description ?? '';
+    }
+
+    allLoaded() {
+        return Boolean(this.token);
     }
 
     async fetch(): Promise<this> {
