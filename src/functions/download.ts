@@ -14,12 +14,11 @@ export async function download(urlOrId: string, options?: DownloadOptions) {
     const liveOrOpus = video.formats.filter((c) =>
         c.isLive ? c.isHLS : c.codec === 'opus' && c.hasAudio && !c.hasVideo
     );
-    // Choose last available format because format is ascending order.
-    const format = liveOrOpus[liveOrOpus.length - 1];
 
-    if (!format) {
+    if (liveOrOpus.length === 0) {
         throw new TypeError(ErrorCodes.NO_SUITABLE_FORMAT);
     }
 
-    return video.download(format, options);
+    // Choose last available format because format is ascending order.
+    return video.download(liveOrOpus[liveOrOpus.length - 1], options);
 }

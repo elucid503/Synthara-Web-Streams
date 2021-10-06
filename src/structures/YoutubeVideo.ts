@@ -251,7 +251,7 @@ export class YoutubeVideo {
 
                 return stream;
             } else {
-                const stream = new PassThrough({ highWaterMark: format.contentLength });
+                const stream = options.resource ?? new PassThrough({ highWaterMark: format.contentLength });
 
                 let startBytes = options.start ?? 0;
 
