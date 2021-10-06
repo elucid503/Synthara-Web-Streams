@@ -84,6 +84,7 @@ export interface DownloadOptions {
     highWaterMark?: number;
     resource?: PassThrough;
     begin?: number | string;
+    start?: number;
 }
 
 export class YoutubeVideo {
@@ -185,8 +186,8 @@ export class YoutubeVideo {
 
                 const downloadChunkSize = options.chunkMode.chunkSize ?? 256 * 1024;
 
-                let startBytes = 0,
-                    endBytes = downloadChunkSize;
+                let startBytes = options.start ?? 0,
+                    endBytes = startBytes + downloadChunkSize;
 
                 let awaitDrain: (() => void) | null;
 
@@ -204,23 +205,21 @@ export class YoutubeVideo {
                 });
 
                 const getNextChunk = () => {
-                    if (endBytes > (format.contentLength as number)) {
-                        endBytes = format.contentLength as number;
-                    }
                     request = miniget(format.url as string, {
                         headers: {
-                            Range: `bytes=${startBytes}-${endBytes}`
+                            Range: `bytes=${startBytes}-${endBytes >= (format.contentLength as number) ? '' : endBytes}`
                         }
                     });
 
                     request.once('error', (error) => {
                         request?.destroy();
-                        if (error.message.includes('403')) {
-                            // Retry download when error is 403 error.
+                        if (error.message === 'Status code: 403') {
+                            // Retry download when error code is 403.
                             request?.removeAllListeners();
                             request = null;
                             options.resource = stream;
-                            download(this.details.url, undefined, options);
+                            options.start = startBytes;
+                            download(this.details.url, options);
                         } else {
                             stream.destroy(error);
                         }
@@ -240,7 +239,7 @@ export class YoutubeVideo {
                     });
 
                     request.once('end', () => {
-                        if (stream.destroyed || endBytes === format.contentLength) {
+                        if (stream.destroyed || endBytes >= (format.contentLength as number)) {
                             return;
                         }
                         endBytes = startBytes + downloadChunkSize;
@@ -254,7 +253,13 @@ export class YoutubeVideo {
             } else {
                 const stream = new PassThrough({ highWaterMark: format.contentLength });
 
-                const request = miniget(format.url as string);
+                let startBytes = options.start ?? 0;
+
+                const request = miniget(format.url as string, {
+                    headers: {
+                        Range: `bytes=${startBytes}-`
+                    }
+                });
 
                 stream.once('close', () => {
                     request.destroy();
@@ -262,20 +267,25 @@ export class YoutubeVideo {
                     request.removeAllListeners();
                 });
 
+                request.pipe(stream);
+
                 request.once('error', (error) => {
                     request.destroy();
-                    if (error.message.includes('403')) {
-                        // Retry download when error is 403 error.
+                    if (error.message === 'Status code: 403') {
+                        // Retry download when error code is 403.
                         request.unpipe(stream);
                         request.removeAllListeners();
                         options.resource = stream;
-                        download(this.details.url, undefined, options);
+                        options.start = startBytes;
+                        download(this.details.url, options);
                     } else {
                         stream.destroy(error);
                     }
                 });
 
-                request.pipe(stream);
+                request.on('data', (chunk: Buffer) => {
+                    startBytes += chunk.length;
+                });
 
                 return stream;
             }

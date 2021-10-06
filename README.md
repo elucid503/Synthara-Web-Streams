@@ -2,13 +2,14 @@
 [![NPM Version](https://img.shields.io/npm/v/youtube-dlsr.svg?maxAge=3600)](https://www.npmjs.com/package/youtube-dlsr)
 [![NPM Downloads](https://img.shields.io/npm/dt/youtube-dlsr.svg?maxAge=3600)](https://www.npmjs.com/package/youtube-dlsr)
 
-### Installing
+## Installing
 `npm install youtube-dlsr`
 
-### GitHub
+## GitHub
 - [GitHub Repository](https://github.com/cjh980402/youtube-dlsr)
 
-### Example
+## Example
+### Automatic format selection
 ```js
 const { download, search } = require('youtube-dlsr');
 const { createWriteStream } = require('fs');
@@ -16,9 +17,25 @@ const { createWriteStream } = require('fs');
 (async () => {
     // Search video.
     const result = await search('no copyright music', { type: 'video' });
-    // Get stream of video.
-    const stream = await download(result[0].url);
+    // Get suitable stream for live video or music bots.
+    const stream = await download(result[0].url, { chunkMode: {} });
     // Write to file.
-    stream.pipe(createWriteStream('./no_copyright_music.ogg'));
+    stream.pipe(createWriteStream('./auto_no_copyright_music.ogg'));
+})();
+```
+### Manually format selection
+```js
+const { getVideoInfo, search } = require('youtube-dlsr');
+const { createWriteStream } = require('fs');
+
+(async () => {
+    // Search video.
+    const result = await search('no copyright music', { type: 'video' });
+    // Get info of video.
+    const video = await getVideoInfo(result[0].url);
+    // Get stream of selected format.
+    const stream = video.download(video.formats.find((c) => c.hasAudio));
+    // Write to file.
+    stream.pipe(createWriteStream('./manual_no_copyright_music.mp3'));
 })();
 ```
