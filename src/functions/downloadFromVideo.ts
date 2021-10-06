@@ -1,4 +1,5 @@
 import { DownloadOptions, YoutubeVideo, YoutubeVideoFormat } from '../structures/YoutubeVideo';
+import { TypeError } from '../structures/TypeError';
 import { ErrorCodes } from '../util/constants';
 
 /**
@@ -16,7 +17,7 @@ export function downloadFromVideo(video: YoutubeVideo, format?: YoutubeVideoForm
     }
 
     if (!format) {
-        throw new Error(ErrorCodes.NO_AVAILABLE_FORMAT);
+        throw new TypeError(ErrorCodes.NO_AVAILABLE_FORMAT);
     }
 
     return video.download(format, options);

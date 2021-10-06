@@ -1,5 +1,7 @@
-const jsVarStr = '[a-zA-Z_\\$][\\w]*';
-const jsQuoteStr = `(?:'${jsVarStr}'|"${jsVarStr}")`;
+const jsVarStr = '[a-zA-Z_\\$]\\w*';
+const jsSingleQuoteStr = `'[^'\\\\]*(:?\\\\[\\s\\S][^'\\\\]*)*'`;
+const jsDoubleQuoteStr = `"[^"\\\\]*(:?\\\\[\\s\\S][^"\\\\]*)*"`;
+const jsQuoteStr = `(?:${jsSingleQuoteStr}|${jsDoubleQuoteStr})`;
 const jsKeyStr = `(?:${jsVarStr}|${jsQuoteStr})`;
 const jsPropStr = `(?:\\.${jsVarStr}|\\[${jsQuoteStr}\\])`;
 const jsEmptyStr = `(?:''|"")`;
@@ -52,7 +54,7 @@ export function decipher(tokens: string[], sig: string): string {
     return arr.join('');
 }
 
-export const extractTokens = (body: string): string[] | null => {
+export function extractTokens(body: string): string[] | null {
     const objResult = actionsObjRegexp.exec(body);
     const funcResult = actionsFuncRegexp.exec(body);
     if (!objResult || !funcResult) {
@@ -102,4 +104,4 @@ export const extractTokens = (body: string): string[] | null => {
         }
     }
     return tokens;
-};
+}

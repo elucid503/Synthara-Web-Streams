@@ -1,3 +1,4 @@
+import { TypeError } from '../structures/TypeError';
 import { YoutubePlaylist } from '../structures/YoutubePlaylist';
 import { ErrorCodes } from '../util/constants';
 import { Util } from '../util/Util';
@@ -9,7 +10,7 @@ export interface GetPlaylistInfoOptions {
 export async function getPlaylistInfo(urlOrId: string, options: GetPlaylistInfoOptions = {}): Promise<YoutubePlaylist> {
     const listId = Util.getListId(urlOrId);
     if (!listId) {
-        throw new Error(ErrorCodes.INVALID_URL);
+        throw new TypeError(ErrorCodes.INVALID_URL);
     }
 
     const playlist = new YoutubePlaylist(listId);

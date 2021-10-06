@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { TypeError } from '../structures/TypeError';
 import { YoutubeVideo } from '../structures/YoutubeVideo';
 import { ErrorCodes } from '../util/constants';
 import { Regexes } from '../util/Regexes';
@@ -7,7 +8,7 @@ import { Util } from '../util/Util';
 export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = false) {
     const videoId = Util.getVideoId(urlOrId);
     if (!videoId) {
-        throw new Error(ErrorCodes.INVALID_URL);
+        throw new TypeError(ErrorCodes.INVALID_URL);
     }
 
     const { data } = await axios.get<string>(`${Util.getYTVideoURL()}${videoId}&hl=en`);
@@ -15,7 +16,7 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
     const json = JSON.parse((Regexes.YOUTUBE_PLAYER_RESPONSE.exec(data) as RegExpExecArray)[1]);
 
     if (json.playabilityStatus?.status === 'ERROR') {
-        throw Error(json.playabilityStatus.reason);
+        throw new Error(json.playabilityStatus.reason);
     }
 
     const video = new YoutubeVideo(json);
