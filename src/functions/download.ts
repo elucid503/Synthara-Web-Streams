@@ -10,15 +10,20 @@ import { ErrorCodes } from '../util/constants';
  */
 export async function download(urlOrId: string, options?: DownloadOptions) {
     const video = await getVideoInfo(urlOrId, true);
-    // This format is suitable for live video or music bots.
-    const liveOrOpus = video.formats.filter((c) =>
-        c.isLive ? c.isHLS : c.codec === 'opus' && c.hasAudio && !c.hasVideo
+    // This format is playable video or audio.
+    const liveOrNormal = video.formats.filter((c) =>
+        c.isLive ? c.isHLS : c.contentLength && (c.hasVideo || c.hasAudio)
     );
+    // This format is suitable for live video or music bots.
+    const hlsOrOpus = liveOrNormal.filter((c) =>
+        c.isLive ? c.isHLS : c.codec === 'opus' && !c.hasVideo && c.hasAudio
+    );
+    // Choose last available format because format is ascending order.
+    const format = hlsOrOpus[hlsOrOpus.length - 1] ?? liveOrNormal[liveOrNormal.length - 1];
 
-    if (liveOrOpus.length === 0) {
+    if (!format) {
         throw new TypeError(ErrorCodes.NO_SUITABLE_FORMAT);
     }
 
-    // Choose last available format because format is ascending order.
-    return video.download(liveOrOpus[liveOrOpus.length - 1], options);
+    return video.download(format, options);
 }

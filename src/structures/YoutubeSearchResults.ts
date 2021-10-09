@@ -1,25 +1,29 @@
 import { Util } from '../util/Util';
 
-export interface YoutubeSearchVideoInfo {
+export interface YoutubeSearchBaseInfo {
+    type: 'video' | 'playlist' | 'channel';
     id: string;
+    url: string;
+    title: string;
     thumbnails: {
         url: string;
         width: string;
         height: string;
     }[];
-    url: string;
-    title: string;
+}
+
+export interface YoutubeSearchVideoInfo extends YoutubeSearchBaseInfo {
+    type: 'video';
     publishedTimeAgo?: string;
-    viewCount: number;
-    formattedViewCount: number;
     description?: string;
     duration: number;
     formattedDuration: string;
-    formattedReadableDuration: string;
+    viewCount: number;
+    formattedViewCount: string;
     channel: {
-        name: string;
         id: string;
         url: string;
+        title: string;
         thumbnails: {
             url: string;
             width: number;
@@ -28,32 +32,18 @@ export interface YoutubeSearchVideoInfo {
     };
 }
 
-export interface YoutubeSearchListInfo {
-    id: string;
-    thumbnails: {
-        url: string;
-        width: string;
-        height: string;
-    }[];
-    url: string;
-    title: string;
+export interface YoutubeSearchListInfo extends YoutubeSearchBaseInfo {
+    type: 'playlist';
+    videoCount: number;
     channel: {
-        name: string;
         id: string;
         url: string;
+        title: string;
     };
-    videoCount: number;
 }
 
-export interface YoutubeSearchChannelInfo {
-    id: string;
-    thumbnails: {
-        url: string;
-        width: string;
-        height: string;
-    }[];
-    url: string;
-    title: string;
+export interface YoutubeSearchChannelInfo extends YoutubeSearchBaseInfo {
+    type: 'channel';
     verified: boolean;
     subscriberCount: number;
 }
@@ -85,64 +75,64 @@ export class YoutubeSearchResults {
 
             if (video) {
                 const rawViewCount: string =
-                    video.viewCountText?.simpleText?.split(' ')[0] ?? video.viewCountText?.runs[0]?.text;
-                const formattedDuration = video.lengthText?.simpleText ?? '0';
-                const formattedReadableDuration = video.lengthText?.accessibility?.accessibilityData.label ?? '0';
-                const formattedViewCount =
-                    video.shortViewCountText?.simpleText ?? video.shortViewCountText?.runs[0]?.text;
+                    video.viewCountText?.simpleText ?? video.viewCountText?.runs[0]?.text ?? '0';
+                const formattedDuration: string = video.lengthText?.simpleText ?? '0:00';
+                const formattedViewCount: string =
+                    video.shortViewCountText?.simpleText ?? video.shortViewCountText?.runs[0]?.text ?? '0 views';
 
                 arr.push({
-                    url: `${Util.getYTVideoURL()}${video.videoId}`,
+                    type: 'video',
                     id: video.videoId,
-                    thumbnails: video.thumbnail.thumbnails,
+                    url: `${Util.getYTVideoURL()}${video.videoId}`,
                     title: video.title.runs[0].text,
-                    channel: {
-                        name: video.ownerText.runs[0].text,
-                        id: video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId,
-                        url: `${Util.getYTChannelURL()}/${
-                            video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId
-                        }`,
-                        thumbnails:
-                            video.channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.thumbnail
-                                .thumbnails
-                    },
-                    viewCount: rawViewCount ? Number(rawViewCount.replace(/,/g, '')) : 0,
+                    thumbnails: video.thumbnail.thumbnails,
                     publishedTimeAgo: video.publishedTimeText?.simpleText,
-                    formattedDuration: formattedDuration,
-                    formattedReadableDuration: formattedReadableDuration,
-                    formattedViewCount: formattedViewCount,
                     description: video.detailedMetadataSnippets?.[0].snippetText.runs.map((e: any) => e.text).join(''),
                     duration:
                         formattedDuration
                             .split(':')
                             .map((d: string) => Number(d))
-                            .reduce((acc: number, time: number) => 60 * acc + time) * 1000
+                            .reduce((acc: number, time: number) => 60 * acc + time) * 1000,
+                    formattedDuration: formattedDuration,
+                    viewCount: Number(rawViewCount.replace(/\D/g, '')),
+                    formattedViewCount: formattedViewCount,
+                    channel: {
+                        id: video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId,
+                        url: `${Util.getYTChannelURL()}/${
+                            video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId
+                        }`,
+                        title: video.ownerText.runs[0].text,
+                        thumbnails:
+                            video.channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.thumbnail
+                                .thumbnails
+                    }
                 });
             } else if (list) {
                 arr.push({
-                    url: `${Util.getYTPlaylistURL()}?list=${list.playlistId}`,
+                    type: 'playlist',
                     id: list.playlistId,
-                    thumbnails: list.thumbnails,
+                    url: `${Util.getYTPlaylistURL()}?list=${list.playlistId}`,
                     title: list.title.simpleText,
+                    thumbnails: list.thumbnails,
+                    videoCount: Number(list.videoCount.replace(/\D/g, '')),
                     channel: {
-                        name: list.shortBylineText.runs[0].text,
                         id: list.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId,
                         url: `${Util.getYTChannelURL()}/${
                             list.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId
-                        }`
-                    },
-                    videoCount: Number(list.videoCount.replace(/\D/g, ''))
+                        }`,
+                        title: list.shortBylineText.runs[0].text
+                    }
                 });
             } else if (channel) {
                 const rawSubscriberCount: string = channel.subscriberCountText?.simpleText ?? '0';
-                const badge = channel.ownerBadges?.[0];
 
                 arr.push({
-                    url: `${Util.getYTChannelURL()}/${channel.channelId}`,
+                    type: 'channel',
                     id: channel.channelId,
-                    thumbnails: channel.thumbnail.thumbnails,
+                    url: `${Util.getYTChannelURL()}/${channel.channelId}`,
                     title: channel.title.simpleText,
-                    verified: Boolean(badge?.metadataBadgeRenderer?.style?.includes('VERIFIED')),
+                    thumbnails: channel.thumbnail.thumbnails,
+                    verified: Boolean(channel.ownerBadges?.[0]?.metadataBadgeRenderer?.style?.includes('VERIFIED')),
                     subscriberCount: Number(rawSubscriberCount)
                 });
             }

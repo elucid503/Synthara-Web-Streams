@@ -2,24 +2,23 @@ import { Util } from '../util/Util';
 
 export interface YoutubeTrendingVideo {
     id: string;
+    url: string;
+    title: string;
     thumbnails: {
         url: string;
         width: string;
         height: string;
     }[];
-    url: string;
-    title: string;
     publishedTimeAgo?: string;
-    viewCount: number;
-    formattedViewCount: number;
     description?: string;
     duration: number;
     formattedDuration: string;
-    formattedReadableDuration: string;
+    viewCount: number;
+    formattedViewCount: string;
     channel: {
-        name: string;
         id: string;
         url: string;
+        title: string;
         thumbnails: {
             url: string;
             width: number;
@@ -35,7 +34,7 @@ export class YoutubeTrending {
         this.json = json;
     }
 
-    get results(): YoutubeTrendingVideo[] {
+    get trends(): YoutubeTrendingVideo[] {
         const arr: YoutubeTrendingVideo[] = [];
 
         for (const data of this.json) {
@@ -43,31 +42,30 @@ export class YoutubeTrending {
 
             if (video) {
                 arr.push({
-                    url: `${Util.getYTVideoURL()}${video.videoId}`,
                     id: video.videoId,
-                    thumbnails: video.thumbnail.thumbnails,
+                    url: `${Util.getYTVideoURL()}${video.videoId}`,
                     title: video.title.runs[0].text,
-                    channel: {
-                        name: video.ownerText.runs[0].text,
-                        id: video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId,
-                        url: `${Util.getYTChannelURL()}/${
-                            video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId
-                        }`,
-                        thumbnails:
-                            video.channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.thumbnail
-                                .thumbnails
-                    },
-                    viewCount: Number(video.viewCountText.simpleText.split(' ')[0].replace(/,/g, '')),
+                    thumbnails: video.thumbnail.thumbnails,
                     publishedTimeAgo: video.publishedTimeText?.simpleText,
-                    formattedDuration: video.lengthText.simpleText,
-                    formattedReadableDuration: video.lengthText.accessibility.accessibilityData.label,
-                    formattedViewCount: video.shortViewCountText.simpleText,
-                    description: video.detailedMetadataSnippets?.[0].snippetText.runs.map((e: any) => e.text).join(''),
+                    description: video.descriptionSnippet?.runs.map((e: any) => e.text).join(''),
                     duration:
                         video.lengthText.simpleText
                             .split(':')
                             .map((d: string) => Number(d))
-                            .reduce((acc: number, time: number) => 60 * acc + time) * 1000
+                            .reduce((acc: number, time: number) => 60 * acc + time) * 1000,
+                    formattedDuration: video.lengthText.simpleText,
+                    viewCount: Number(video.viewCountText.simpleText.replace(/\D/g, '')),
+                    formattedViewCount: video.shortViewCountText.simpleText,
+                    channel: {
+                        id: video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId,
+                        url: `${Util.getYTChannelURL()}/${
+                            video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId
+                        }`,
+                        title: video.ownerText.runs[0].text,
+                        thumbnails:
+                            video.channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.thumbnail
+                                .thumbnails
+                    }
                 });
             }
         }

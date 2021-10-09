@@ -7,21 +7,20 @@ import { Util } from '../util/Util';
 export interface PlaylistVideo {
     id: string;
     url: string;
+    title: string;
     thumbnails: {
         width: number;
         height: number;
         url: string;
     }[];
-    title: string;
     index: number;
     duration: number;
     formattedDuration: string;
-    formattedReadableDuration: string;
     isPlayable: boolean;
 }
 
 export interface PlaylistData {
-    name: string;
+    title: string;
     description: string;
 }
 
@@ -40,7 +39,7 @@ export class YoutubePlaylist {
     }
 
     get title() {
-        return this.data?.name ?? '';
+        return this.data?.title ?? '';
     }
 
     get description() {
@@ -127,7 +126,7 @@ export class YoutubePlaylist {
         const metadata = json.metadata.playlistMetadataRenderer;
 
         this.data = {
-            name: metadata.title,
+            title: metadata.title,
             description: metadata.description
         };
 
@@ -169,15 +168,14 @@ export class YoutubePlaylist {
 
             if (track) {
                 this.tracks.push({
-                    url: `${Util.getYTVideoURL()}${track.videoId}`,
                     id: track.videoId,
-                    index: Number(track.index?.simpleText),
-                    formattedDuration: track.lengthText?.simpleText,
-                    formattedReadableDuration: track.lengthText?.accessibility.accessibilityData.label,
-                    duration: Number(track.lengthSeconds) * 1000,
-                    isPlayable: track.isPlayable,
+                    url: `${Util.getYTVideoURL()}${track.videoId}`,
+                    title: track.title?.runs?.[0].text,
                     thumbnails: track.thumbnail?.thumbnails ?? [],
-                    title: track.title?.runs?.[0].text
+                    index: Number(track.index?.simpleText ?? '0'),
+                    duration: Number(track.lengthSeconds) * 1000,
+                    formattedDuration: track.lengthText?.simpleText ?? '0:00',
+                    isPlayable: track.isPlayable
                 });
             }
         }
