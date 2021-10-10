@@ -10,31 +10,32 @@ import { Util } from '../util/Util';
 const cachedTokens: Map<string, string[]> = new Map();
 
 export interface YoutubeVideoDetails {
-    url: string;
     id: string;
+    url: string;
     title: string;
-    duration: number;
-    keywords: string[];
-    channelId: string;
-    isOwnerViewing: boolean;
-    shortDescription: string;
-    isCrawlable: boolean;
     thumbnails: {
         url: string;
         height: string;
         width: string;
     }[];
-    averageRating: number;
-    allowRatings: boolean;
+    description: string;
+    duration: number;
     viewCount: number;
     author: string;
-    isPrivate: boolean;
+    channelId: string;
+    keywords: string[];
+    allowRatings: boolean;
+    averageRating: number;
+    isOwnerViewing: boolean;
+    isCrawlable: boolean;
     isUnpluggedCorpus: boolean;
+    isPrivate: boolean;
     isLiveContent: boolean;
 }
 
 export interface YoutubeVideoFormat {
     itag: number;
+    url: string;
     mimeType: string;
     codec: string;
     type: string;
@@ -57,14 +58,12 @@ export interface YoutubeVideoFormat {
     loudnessDb?: number;
     s?: string;
     sp?: string;
-    url: string;
     fps?: number;
     qualityLabel: string | null;
     projectionType?: 'RECTANGULAR';
     averageBitrate?: number;
     approxDurationMs?: number;
     signatureCipher?: string;
-    getDecodedCipher?: () => string | undefined;
 
     /* Provided by itag format. */
     audioBitrate?: number | null;
@@ -99,7 +98,7 @@ export class YoutubeVideo {
     }
 
     get url() {
-        return `${Util.getYTVideoURL()}${this.info.id}`;
+        return `${Util.getYTVideoURL()}${this.json.videoDetails.videoId}`;
     }
 
     get formats(): YoutubeVideoFormat[] {
@@ -111,6 +110,7 @@ export class YoutubeVideo {
         ] as any[]) {
             let frmt: YoutubeVideoFormat = {
                 itag: format.itag,
+                url: format.url,
                 mimeType: format.mimeType,
                 type: format.mimeType.split(';')[0],
                 codec: format.mimeType.split('"')[1],
@@ -127,15 +127,13 @@ export class YoutubeVideo {
                 },
                 lastModifiedTimestamp: Number(format.lastModified),
                 contentLength: Number(format.contentLength),
-                fps: format.fps,
                 quality: format.quality,
-                url: format.url,
+                fps: format.fps,
                 qualityLabel: format.qualityLabel,
                 projectionType: format.projectionType,
                 averageBitrate: format.averageBitrate,
                 approxDurationMs: Number(format.approxDurationMs),
-                signatureCipher: format.signatureCipher ?? format.cipher,
-                getDecodedCipher: () => decodeURIComponent(format.signatureCipher)
+                signatureCipher: format.signatureCipher ?? format.cipher
             };
 
             if (format.url && !frmt.signatureCipher) {
@@ -293,11 +291,7 @@ export class YoutubeVideo {
     }
 
     get info(): YoutubeVideoDetails & { formats: YoutubeVideoFormat[] } {
-        const details = this.details;
-
-        const formats = this.formats;
-
-        return { ...details, formats };
+        return { ...this.details, formats: this.formats };
     }
 
     getHtml5Player(body: string): string {
@@ -327,22 +321,22 @@ export class YoutubeVideo {
 
     get details(): YoutubeVideoDetails {
         return {
-            url: `${Util.getYTVideoURL()}${this.json.videoDetails.videoId}`,
             id: this.json.videoDetails.videoId,
+            url: `${Util.getYTVideoURL()}${this.json.videoDetails.videoId}`,
             title: this.json.videoDetails.title,
+            thumbnails: this.json.videoDetails.thumbnail.thumbnails,
+            description: this.json.videoDetails.shortDescription,
             duration: Number(this.json.videoDetails.lengthSeconds) * 1000,
+            viewCount: Number(this.json.videoDetails.viewCount),
+            author: this.json.videoDetails.author,
             channelId: this.json.videoDetails.channelId,
             keywords: this.json.videoDetails.keywords,
-            isOwnerViewing: this.json.videoDetails.isOwnerViewing,
-            shortDescription: this.json.videoDetails.shortDescription,
-            isCrawlable: this.json.videoDetails.isCrawlable,
-            thumbnails: this.json.videoDetails.thumbnail.thumbnails,
-            averageRating: this.json.videoDetails.averageRating,
             allowRatings: this.json.videoDetails.allowRatings,
-            viewCount: Number(this.json.videoDetails.viewCount),
-            isPrivate: this.json.videoDetails.isPrivate,
-            author: this.json.videoDetails.author,
+            averageRating: this.json.videoDetails.averageRating,
+            isOwnerViewing: this.json.videoDetails.isOwnerViewing,
+            isCrawlable: this.json.videoDetails.isCrawlable,
             isUnpluggedCorpus: this.json.videoDetails.isUnpluggedCorpus,
+            isPrivate: this.json.videoDetails.isPrivate,
             isLiveContent: this.json.videoDetails.isLiveContent
         };
     }

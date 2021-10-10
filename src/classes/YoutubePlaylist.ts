@@ -15,7 +15,7 @@ export interface PlaylistVideo {
     }[];
     index: number;
     duration: number;
-    formattedDuration: string;
+    durationText: string;
     isPlayable: boolean;
 }
 
@@ -25,8 +25,8 @@ export interface PlaylistData {
 }
 
 export class YoutubePlaylist {
-    tracks: PlaylistVideo[] = [];
     listId: string;
+    tracks: PlaylistVideo[] = [];
     data?: PlaylistData;
     totalPageCount = 0;
 
@@ -38,6 +38,10 @@ export class YoutubePlaylist {
         this.listId = listId;
     }
 
+    get url() {
+        return `${Util.getYTPlaylistURL()}?list=${this.listId}`;
+    }
+
     get title() {
         return this.data?.title ?? '';
     }
@@ -46,22 +50,29 @@ export class YoutubePlaylist {
         return this.data?.description ?? '';
     }
 
+    get context() {
+        const context = { ...DEFAULT_CONTEXT };
+
+        if (this.clientVersion) {
+            context.client.clientVersion = this.clientVersion;
+        }
+
+        return context;
+    }
+
     allLoaded() {
         return Boolean(this.token);
     }
 
     async fetch(): Promise<this> {
-        if (!this.tracks.length) {
+        if (this.tracks.length === 0 || !this.token || !this.apiKey) {
             await this.fetchFirstPage();
         }
 
-        if (!this.token || !this.apiKey) {
-            await this.fetchFirstPage();
-            if (!this.token) {
-                throw new TypeError(ErrorCodes.UNKNOWN_TOKEN);
-            } else {
-                throw new TypeError(ErrorCodes.API_KEY_FAILED);
-            }
+        if (!this.token) {
+            throw new TypeError(ErrorCodes.UNKNOWN_TOKEN);
+        } else if (!this.apiKey) {
+            throw new TypeError(ErrorCodes.API_KEY_FAILED);
         }
 
         const { data: json } = await axios.post<any>(`${Util.getYTApiBaseURL()}/browse?key=${this.apiKey}`, {
@@ -75,27 +86,21 @@ export class YoutubePlaylist {
 
         if (renderer) {
             this.token = renderer.continuationEndpoint.continuationCommand.token;
-
             if (!this.token) {
                 throw new TypeError(ErrorCodes.UNKNOWN_TOKEN);
             }
 
             this.addTracks(tracks);
-            return await this.fetch();
+            return this.fetch();
         } else {
             delete this.token;
             this.addTracks(tracks);
+            return this;
         }
-
-        return this;
-    }
-
-    get url() {
-        return `${Util.getYTPlaylistURL()}?list=${this.listId}`;
     }
 
     async fetchFirstPage() {
-        if (this.tracks.length > 99) {
+        if (this.tracks.length > 100) {
             return this.tracks.slice(0, 100);
         }
 
@@ -113,7 +118,7 @@ export class YoutubePlaylist {
 
         const json = JSON.parse(res);
 
-        const apiKey = Regexes.YOUTUBE_API_KEY.exec(request.data)?.[1];
+        const apiKey = Regexes.INNERTUBE_API_KEY.exec(request.data)?.[1];
 
         const version = Regexes.INNERTUBE_CLIENT_VERSION.exec(request.data)?.[1];
 
@@ -138,7 +143,6 @@ export class YoutubePlaylist {
 
         if (renderer) {
             this.token = renderer.continuationEndpoint.continuationCommand.token;
-
             if (!this.token) {
                 throw new TypeError(ErrorCodes.UNKNOWN_TOKEN);
             }
@@ -150,16 +154,6 @@ export class YoutubePlaylist {
         this.addTracks(tracks);
 
         return this.tracks.slice(0, 100);
-    }
-
-    get context() {
-        const context = { ...DEFAULT_CONTEXT };
-
-        if (this.clientVersion) {
-            context.client.clientVersion = this.clientVersion;
-        }
-
-        return context;
     }
 
     private addTracks(tracks: any[]): this {
@@ -174,7 +168,7 @@ export class YoutubePlaylist {
                     thumbnails: track.thumbnail?.thumbnails ?? [],
                     index: Number(track.index?.simpleText ?? '0'),
                     duration: Number(track.lengthSeconds) * 1000,
-                    formattedDuration: track.lengthText?.simpleText ?? '0:00',
+                    durationText: track.lengthText?.simpleText ?? '0:00',
                     isPlayable: track.isPlayable
                 });
             }

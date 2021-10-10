@@ -12,16 +12,17 @@ export interface SearchOption {
     limit?: number;
 }
 
-export async function search(query: string, { type, limit = Infinity }: SearchOption = {}) {
+/**
+ * Search a youtube using query and options.
+ * @param query The query of the search.
+ * @param options The options to use for the search.
+ */
+export async function search(query: string, { type = 'video', limit = Infinity }: SearchOption = {}) {
     const params = new URLSearchParams();
 
-    params.append('search_query', query);
-
+    params.append('search_query', query.replace(/ /g, '+'));
     params.append('hl', 'en');
-
-    if (type && SearchType[type]) {
-        params.append('sp', SearchType[type]);
-    }
+    params.append('sp', SearchType[type]);
 
     const { results } = await getSearchInfo(`${Util.getYTSearchURL()}?${params}`, limit);
 

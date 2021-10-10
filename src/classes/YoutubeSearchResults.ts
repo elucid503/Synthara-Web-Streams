@@ -17,9 +17,9 @@ export interface YoutubeSearchVideoInfo extends YoutubeSearchBaseInfo {
     publishedTimeAgo?: string;
     description?: string;
     duration: number;
-    formattedDuration: string;
+    durationText: string;
     viewCount: number;
-    formattedViewCount: string;
+    viewCountText: string;
     channel: {
         id: string;
         url: string;
@@ -45,7 +45,7 @@ export interface YoutubeSearchListInfo extends YoutubeSearchBaseInfo {
 export interface YoutubeSearchChannelInfo extends YoutubeSearchBaseInfo {
     type: 'channel';
     verified: boolean;
-    subscriberCount: number;
+    subscriberCountText: string;
 }
 
 export class YoutubeSearchResults {
@@ -76,8 +76,8 @@ export class YoutubeSearchResults {
             if (video) {
                 const rawViewCount: string =
                     video.viewCountText?.simpleText ?? video.viewCountText?.runs[0]?.text ?? '0';
-                const formattedDuration: string = video.lengthText?.simpleText ?? '0:00';
-                const formattedViewCount: string =
+                const durationText: string = video.lengthText?.simpleText ?? '0:00';
+                const viewCountText: string =
                     video.shortViewCountText?.simpleText ?? video.shortViewCountText?.runs[0]?.text ?? '0 views';
 
                 arr.push({
@@ -89,13 +89,13 @@ export class YoutubeSearchResults {
                     publishedTimeAgo: video.publishedTimeText?.simpleText,
                     description: video.detailedMetadataSnippets?.[0].snippetText.runs.map((e: any) => e.text).join(''),
                     duration:
-                        formattedDuration
+                        durationText
                             .split(':')
                             .map((d: string) => Number(d))
                             .reduce((acc: number, time: number) => 60 * acc + time) * 1000,
-                    formattedDuration: formattedDuration,
+                    durationText: durationText,
                     viewCount: Number(rawViewCount.replace(/\D/g, '')),
-                    formattedViewCount: formattedViewCount,
+                    viewCountText: viewCountText,
                     channel: {
                         id: video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId,
                         url: `${Util.getYTChannelURL()}/${
@@ -124,7 +124,7 @@ export class YoutubeSearchResults {
                     }
                 });
             } else if (channel) {
-                const rawSubscriberCount: string = channel.subscriberCountText?.simpleText ?? '0';
+                const subscriberCountText: string = channel.subscriberCountText?.simpleText ?? '0 subscribers';
 
                 arr.push({
                     type: 'channel',
@@ -133,7 +133,7 @@ export class YoutubeSearchResults {
                     title: channel.title.simpleText,
                     thumbnails: channel.thumbnail.thumbnails,
                     verified: Boolean(channel.ownerBadges?.[0]?.metadataBadgeRenderer?.style?.includes('VERIFIED')),
-                    subscriberCount: Number(rawSubscriberCount)
+                    subscriberCountText: subscriberCountText
                 });
             }
 

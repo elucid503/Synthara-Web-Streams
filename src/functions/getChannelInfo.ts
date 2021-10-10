@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { YoutubeChannel } from '../structures/YoutubeChannel';
+import { YoutubeChannel } from '../classes/YoutubeChannel';
 import { Regexes } from '../util/Regexes';
 import { Util } from '../util/Util';
 

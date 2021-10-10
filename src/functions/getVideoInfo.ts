@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { TypeError } from '../structures/TypeError';
-import { YoutubeVideo } from '../structures/YoutubeVideo';
+import { TypeError } from '../classes/TypeError';
+import { YoutubeVideo } from '../classes/YoutubeVideo';
 import { ErrorCodes } from '../util/constants';
 import { Regexes } from '../util/Regexes';
 import { Util } from '../util/Util';
@@ -24,10 +24,10 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
     video.getHtml5Player(data);
     await video.fetchTokens();
 
-    const dashUrl = json.streamingData?.dashManifestUrl;
-    const hlsUrl = json.streamingData?.hlsManifestUrl;
-
     if (getLiveFormats) {
+        const dashUrl = json.streamingData?.dashManifestUrl;
+        const hlsUrl = json.streamingData?.hlsManifestUrl;
+
         video.liveFormats = [];
         const pending: Promise<typeof video.liveFormats>[] = [];
         if (dashUrl) {

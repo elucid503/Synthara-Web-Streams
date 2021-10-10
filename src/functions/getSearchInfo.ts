@@ -1,12 +1,11 @@
 import axios from 'axios';
-import { SearchError } from '../structures/SearchError';
-import { YoutubeSearchResults } from '../structures/YoutubeSearchResults';
+import { SearchError } from '../classes/SearchError';
+import { YoutubeSearchResults } from '../classes/YoutubeSearchResults';
 import { ErrorCodes } from '../util/constants';
 import { Regexes } from '../util/Regexes';
 
 export async function getSearchInfo(url: string, limit: number) {
     const request = await axios.get<string>(url).catch(() => {});
-
     if (!request) {
         throw new SearchError(ErrorCodes.SEARCH_FAILED);
     }

@@ -1,6 +1,8 @@
 import { Util } from '../util/Util';
 
 export interface YoutubeChannelInfo {
+    id: string;
+    url: string;
     title: string;
     avatars: {
         url: string;
@@ -12,13 +14,12 @@ export interface YoutubeChannelInfo {
         height: number;
         width?: number;
     }[];
-    subscriberFormattedCount: string;
-    channelId: string;
-    availableCountryCodes: string[];
+    description: string;
+    subscriberCountText: string;
     isFamilySafe: boolean;
     keywords: string;
-    description: string;
     rssUrl: string;
+    availableCountryCodes: string[];
 }
 
 export class YoutubeChannel {
@@ -29,7 +30,7 @@ export class YoutubeChannel {
     }
 
     get url() {
-        return `${Util.getYTChannelURL()}/${this.details.channelId}`;
+        return `${Util.getYTChannelURL()}/${this.json.header.c4TabbedHeaderRenderer.channelId}`;
     }
 
     get<K extends keyof YoutubeChannelInfo>(key: K): YoutubeChannelInfo[K] {
@@ -41,16 +42,17 @@ export class YoutubeChannel {
         const metadata = this.json.metadata.channelMetadataRenderer;
 
         return {
-            channelId: header.channelId,
+            id: header.channelId,
+            url: `${Util.getYTChannelURL()}/${header.channelId}`,
             title: header.title,
             avatars: header.avatar.thumbnails,
             banners: header.banner.thumbnails,
-            keywords: metadata.keywords,
             description: metadata.description,
-            rssUrl: metadata.rssUrl,
+            subscriberCountText: header.subscriberCountText.simpleText,
             isFamilySafe: metadata.isFamilySafe,
-            availableCountryCodes: metadata.availableCountryCodes,
-            subscriberFormattedCount: header.subscriberCountText.simpleText
+            keywords: metadata.keywords,
+            rssUrl: metadata.rssUrl,
+            availableCountryCodes: metadata.availableCountryCodes
         };
     }
 }

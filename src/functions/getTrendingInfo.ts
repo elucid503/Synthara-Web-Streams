@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { YoutubeTrending } from '../structures/YoutubeTrending';
+import { YoutubeTrending } from '../classes/YoutubeTrending';
 import { Regexes } from '../util/Regexes';
 import { Util } from '../util/Util';
 

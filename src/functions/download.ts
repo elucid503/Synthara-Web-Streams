@@ -1,6 +1,6 @@
 import { getVideoInfo } from './getVideoInfo';
-import { TypeError } from '../structures/TypeError';
-import { DownloadOptions } from '../structures/YoutubeVideo';
+import { TypeError } from '../classes/TypeError';
+import { DownloadOptions } from '../classes/YoutubeVideo';
 import { ErrorCodes } from '../util/constants';
 
 /**
@@ -11,15 +11,13 @@ import { ErrorCodes } from '../util/constants';
 export async function download(urlOrId: string, options?: DownloadOptions) {
     const video = await getVideoInfo(urlOrId, true);
     // This format is playable video or audio.
-    const liveOrNormal = video.formats.filter((c) =>
-        c.isLive ? c.isHLS : c.contentLength && (c.hasVideo || c.hasAudio)
+    const playableFormats = video.formats.filter((f) =>
+        f.isLive ? f.isHLS : f.contentLength && (f.hasVideo || f.hasAudio)
     );
     // This format is suitable for live video or music bots.
-    const hlsOrOpus = liveOrNormal.filter((c) =>
-        c.isLive ? c.isHLS : c.codec === 'opus' && !c.hasVideo && c.hasAudio
-    );
+    const liveOrOpus = playableFormats.filter((f) => f.isLive || (f.codec === 'opus' && !f.hasVideo && f.hasAudio));
     // Choose last available format because format is ascending order.
-    const format = hlsOrOpus[hlsOrOpus.length - 1] ?? liveOrNormal[liveOrNormal.length - 1];
+    const format = liveOrOpus[liveOrOpus.length - 1] ?? playableFormats[playableFormats.length - 1];
 
     if (!format) {
         throw new TypeError(ErrorCodes.NO_SUITABLE_FORMAT);

@@ -12,9 +12,9 @@ export interface YoutubeTrendingVideo {
     publishedTimeAgo?: string;
     description?: string;
     duration: number;
-    formattedDuration: string;
+    durationText: string;
     viewCount: number;
-    formattedViewCount: string;
+    viewCountText: string;
     channel: {
         id: string;
         url: string;
@@ -53,9 +53,9 @@ export class YoutubeTrending {
                             .split(':')
                             .map((d: string) => Number(d))
                             .reduce((acc: number, time: number) => 60 * acc + time) * 1000,
-                    formattedDuration: video.lengthText.simpleText,
+                    durationText: video.lengthText.simpleText,
                     viewCount: Number(video.viewCountText.simpleText.replace(/\D/g, '')),
-                    formattedViewCount: video.shortViewCountText.simpleText,
+                    viewCountText: video.shortViewCountText.simpleText,
                     channel: {
                         id: video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId,
                         url: `${Util.getYTChannelURL()}/${

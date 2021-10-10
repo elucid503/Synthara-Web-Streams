@@ -1,13 +1,9 @@
-import { TypeError } from '../structures/TypeError';
-import { YoutubePlaylist } from '../structures/YoutubePlaylist';
+import { TypeError } from '../classes/TypeError';
+import { YoutubePlaylist } from '../classes/YoutubePlaylist';
 import { ErrorCodes } from '../util/constants';
 import { Util } from '../util/Util';
 
-export interface GetPlaylistInfoOptions {
-    full?: boolean;
-}
-
-export async function getPlaylistInfo(urlOrId: string, options: GetPlaylistInfoOptions = {}): Promise<YoutubePlaylist> {
+export async function getPlaylistInfo(urlOrId: string, getAllVideos: boolean): Promise<YoutubePlaylist> {
     const listId = Util.getListId(urlOrId);
     if (!listId) {
         throw new TypeError(ErrorCodes.INVALID_URL);
@@ -15,7 +11,7 @@ export async function getPlaylistInfo(urlOrId: string, options: GetPlaylistInfoO
 
     const playlist = new YoutubePlaylist(listId);
 
-    if (options.full) {
+    if (getAllVideos) {
         await playlist.fetch();
     } else {
         await playlist.fetchFirstPage();

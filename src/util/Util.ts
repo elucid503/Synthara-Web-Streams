@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { parse as xmlParse } from 'fast-xml-parser';
-import { YoutubeVideoFormat } from '../structures/YoutubeVideo';
 import { formats } from './formats';
+import { YoutubeVideoFormat } from '../classes/YoutubeVideo';
 const videoRegex = /^[\w-]{11}$/;
 const listRegex = /^[\w-]{12,}$/;
 const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts)\/)/;
@@ -125,23 +125,21 @@ export class Util extends null {
             const { data } = await axios.get<string>(new URL(url, Util.getYTVideoURL()).toString());
 
             for (const line of data.split('\n')) {
-                if (!/^https?:\/\//.test(line)) {
-                    continue;
-                }
+                if (/^https?:\/\//.test(line)) {
+                    const itag = Number(/\/itag\/(\d+)\//.exec(line)?.[1]) as keyof typeof formats;
+                    const reservedFormat = formats[itag];
 
-                const itag = Number(/\/itag\/(\d+)\//.exec(line)?.[1]) as keyof typeof formats;
-                const reservedFormat = formats[itag];
+                    if (reservedFormat) {
+                        const format: YoutubeVideoFormat = {
+                            ...reservedFormat,
+                            itag,
+                            url: line,
+                            type: reservedFormat.mimeType.split(';')[0],
+                            codec: reservedFormat.mimeType.split('"')[1]
+                        };
 
-                if (reservedFormat) {
-                    const format: YoutubeVideoFormat = {
-                        ...reservedFormat,
-                        itag,
-                        url: line,
-                        type: reservedFormat.mimeType.split(';')[0],
-                        codec: reservedFormat.mimeType.split('"')[1]
-                    };
-
-                    hlsFormats.push(Util.addMetadataToFormat(format));
+                        hlsFormats.push(Util.addMetadataToFormat(format));
+                    }
                 }
             }
         } catch {}
