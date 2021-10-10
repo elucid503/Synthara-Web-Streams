@@ -40,9 +40,9 @@ export class Util extends null {
         return 'https://www.youtube.com/youtubei/v1';
     }
 
-    static getVideoId(urlOrId: string): string | null {
+    static getVideoId(urlOrId: string, checkUrl: boolean = false): string | null {
         try {
-            if (videoRegex.test(urlOrId)) {
+            if (videoRegex.test(urlOrId) && !checkUrl) {
                 return urlOrId;
             }
             const parsed = new URL(urlOrId);
@@ -59,9 +59,9 @@ export class Util extends null {
         }
     }
 
-    static getListId(urlOrId: string): string | null {
+    static getListId(urlOrId: string, checkUrl: boolean = false): string | null {
         try {
-            if (listRegex.test(urlOrId)) {
+            if (listRegex.test(urlOrId) && !checkUrl) {
                 return urlOrId;
             }
             const parsed = new URL(urlOrId);
