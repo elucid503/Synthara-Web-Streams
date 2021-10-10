@@ -3,7 +3,7 @@ import { YoutubeTrending } from '../classes/YoutubeTrending';
 import { Regexes } from '../util/constants';
 import { Util } from '../util/Util';
 
-export async function getYoutubeTrending() {
+export async function getTrendingInfo() {
     const { data } = await axios.get<string>(`${Util.getYTTrendingURL()}?hl=en`);
 
     const json = JSON.parse((Regexes.YOUTUBE_INITIAL_DATA.exec(data) as RegExpExecArray)[1]);
