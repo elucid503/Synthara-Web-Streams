@@ -82,7 +82,7 @@ export class Util extends null {
         return format;
     }
 
-    static async dashMpdFormat(url: string): Promise<YoutubeVideoFormat[]> {
+    static async getDashFormats(url: string): Promise<YoutubeVideoFormat[]> {
         const dashFormats: YoutubeVideoFormat[] = [];
         try {
             const { data } = await axios.get<string>(new URL(url, Util.getYTVideoURL()).toString());
@@ -119,7 +119,7 @@ export class Util extends null {
         return dashFormats;
     }
 
-    static async m3u8Format(url: string): Promise<YoutubeVideoFormat[]> {
+    static async getHlsFormats(url: string): Promise<YoutubeVideoFormat[]> {
         const hlsFormats: YoutubeVideoFormat[] = [];
         try {
             const { data } = await axios.get<string>(new URL(url, Util.getYTVideoURL()).toString());

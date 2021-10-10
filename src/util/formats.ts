@@ -446,4 +446,4 @@ export const formats = {
         bitrate: 12000000,
         audioBitrate: null
     }
-};
+} as const;

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { YoutubeChannel } from '../classes/YoutubeChannel';
-import { Regexes } from '../util/Regexes';
+import { Regexes } from '../util/constants';
 import { Util } from '../util/Util';
 
 /**

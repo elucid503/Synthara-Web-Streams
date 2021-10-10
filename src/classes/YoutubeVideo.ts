@@ -5,7 +5,7 @@ import { parse as queryParse } from 'querystring';
 import { PassThrough } from 'stream';
 import { download } from '../functions/download';
 import { decipher, extractTokens } from '../util/decipher';
-import { Regexes } from '../util/Regexes';
+import { Regexes } from '../util/constants';
 import { Util } from '../util/Util';
 const cachedTokens: Map<string, string[]> = new Map();
 

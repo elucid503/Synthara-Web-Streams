@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { SearchError } from '../classes/SearchError';
 import { YoutubeSearchResults } from '../classes/YoutubeSearchResults';
-import { ErrorCodes } from '../util/constants';
-import { Regexes } from '../util/Regexes';
+import { ErrorCodes, Regexes } from '../util/constants';
 
 export async function getSearchInfo(url: string, limit: number) {
     const request = await axios.get<string>(url).catch(() => {});

@@ -16,9 +16,9 @@ export async function download(urlOrId: string, options?: DownloadOptions) {
     );
     // This format is suitable for live video or music bots.
     const liveOrOpus = playableFormats.filter((f) => f.isLive || (f.codec === 'opus' && !f.hasVideo && f.hasAudio));
+
     // Choose last available format because format is ascending order.
     const format = liveOrOpus[liveOrOpus.length - 1] ?? playableFormats[playableFormats.length - 1];
-
     if (!format) {
         throw new TypeError(ErrorCodes.NO_SUITABLE_FORMAT);
     }

@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { TypeError } from './TypeError';
-import { DEFAULT_CONTEXT, ErrorCodes } from '../util/constants';
-import { Regexes } from '../util/Regexes';
+import { DEFAULT_CONTEXT, ErrorCodes, Regexes } from '../util/constants';
 import { Util } from '../util/Util';
 
 export interface PlaylistVideo {
@@ -25,14 +24,14 @@ export interface PlaylistData {
 }
 
 export class YoutubePlaylist {
-    listId: string;
-    tracks: PlaylistVideo[] = [];
-    data?: PlaylistData;
     totalPageCount = 0;
+    tracks: PlaylistVideo[] = [];
+    listId: string;
+    data?: PlaylistData;
 
-    private token?: string;
-    private apiKey?: string;
-    private clientVersion?: string;
+    private token: string | null = null;
+    private apiKey: string | null = null;
+    private clientVersion: string | null = null;
 
     constructor(listId: string) {
         this.listId = listId;
@@ -61,16 +60,19 @@ export class YoutubePlaylist {
     }
 
     allLoaded() {
-        return Boolean(this.token);
+        return Boolean(this.tracks.length > 0 && !this.token && this.apiKey);
     }
 
-    async fetch(): Promise<this> {
+    async fetch() {
         if (this.tracks.length === 0 || !this.token || !this.apiKey) {
             await this.fetchFirstPage();
+            if (!this.token) {
+                return;
+            }
         }
 
         if (!this.token) {
-            throw new TypeError(ErrorCodes.UNKNOWN_TOKEN);
+            throw new TypeError(ErrorCodes.INVALID_TOKEN);
         } else if (!this.apiKey) {
             throw new TypeError(ErrorCodes.API_KEY_FAILED);
         }
@@ -87,46 +89,43 @@ export class YoutubePlaylist {
         if (renderer) {
             this.token = renderer.continuationEndpoint.continuationCommand.token;
             if (!this.token) {
-                throw new TypeError(ErrorCodes.UNKNOWN_TOKEN);
+                throw new TypeError(ErrorCodes.INVALID_TOKEN);
             }
 
             this.addTracks(tracks);
-            return this.fetch();
+            await this.fetch();
         } else {
-            delete this.token;
+            this.token = null;
             this.addTracks(tracks);
-            return this;
         }
     }
 
     async fetchFirstPage() {
-        if (this.tracks.length > 100) {
-            return this.tracks.slice(0, 100);
+        if (this.tracks.length > 0) {
+            return;
         }
 
         const request = await axios.get<string>(`${Util.getYTPlaylistURL()}?list=${this.listId}&hl=en`).catch(() => {});
-
         if (!request) {
             throw new TypeError(ErrorCodes.PLAYLIST_LOAD_FAILED);
         }
 
         const res = Regexes.YOUTUBE_INITIAL_DATA.exec(request.data)?.[1];
-
         if (!res) {
             throw new TypeError(ErrorCodes.PLAYLIST_LOAD_FAILED);
         }
 
-        const json = JSON.parse(res);
-
         const apiKey = Regexes.INNERTUBE_API_KEY.exec(request.data)?.[1];
-
-        const version = Regexes.INNERTUBE_CLIENT_VERSION.exec(request.data)?.[1];
-
-        if (!version) {
-            throw new TypeError(ErrorCodes.CLIENT_VERSION_FAILED);
-        } else if (!apiKey) {
+        if (!apiKey) {
             throw new TypeError(ErrorCodes.API_KEY_FAILED);
         }
+
+        const version = Regexes.INNERTUBE_CLIENT_VERSION.exec(request.data)?.[1];
+        if (!version) {
+            throw new TypeError(ErrorCodes.CLIENT_VERSION_FAILED);
+        }
+
+        const json = JSON.parse(res);
 
         const metadata = json.metadata.playlistMetadataRenderer;
 
@@ -144,7 +143,7 @@ export class YoutubePlaylist {
         if (renderer) {
             this.token = renderer.continuationEndpoint.continuationCommand.token;
             if (!this.token) {
-                throw new TypeError(ErrorCodes.UNKNOWN_TOKEN);
+                throw new TypeError(ErrorCodes.INVALID_TOKEN);
             }
         }
 
@@ -152,11 +151,9 @@ export class YoutubePlaylist {
         this.apiKey = apiKey;
 
         this.addTracks(tracks);
-
-        return this.tracks.slice(0, 100);
     }
 
-    private addTracks(tracks: any[]): this {
+    private addTracks(tracks: any[]) {
         for (const data of tracks) {
             const track = data.playlistVideoRenderer;
 
@@ -175,7 +172,5 @@ export class YoutubePlaylist {
         }
 
         this.totalPageCount++;
-
-        return this;
     }
 }

@@ -1,11 +1,11 @@
 import { getSearchInfo } from './getSearchInfo';
 import { Util } from '../util/Util';
 
-enum SearchType {
-    video = 'EgIQAQ%3D%3D',
-    playlist = 'EgIQAw%3D%3D',
-    channel = 'EgIQAg%3D%3D'
-}
+const SearchType = {
+    video: 'EgIQAQ%3D%3D',
+    playlist: 'EgIQAw%3D%3D',
+    channel: 'EgIQAg%3D%3D'
+};
 
 export interface SearchOption {
     type?: keyof typeof SearchType;
@@ -21,8 +21,8 @@ export async function search(query: string, { type = 'video', limit = Infinity }
     const params = new URLSearchParams();
 
     params.append('search_query', query.replace(/ /g, '+'));
-    params.append('hl', 'en');
     params.append('sp', SearchType[type]);
+    params.append('hl', 'en');
 
     const { results } = await getSearchInfo(`${Util.getYTSearchURL()}?${params}`, limit);
 
