@@ -10,7 +10,7 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
         throw new TypeError(ErrorCodes.INVALID_URL);
     }
 
-    const { data } = await axios.get<string>(`${Util.getYTVideoURL()}${videoId}&hl=en`);
+    const { data } = await axios.get<string>(`${Util.getYTVideoURL()}${videoId}&has_verified=1&hl=en`);
 
     const json = JSON.parse((Regexes.YOUTUBE_PLAYER_RESPONSE.exec(data) as RegExpExecArray)[1]);
 

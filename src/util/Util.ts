@@ -8,7 +8,7 @@ const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|
 const validQueryDomains = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com'];
 
 export class Util extends null {
-    static getBaseYTURL() {
+    static getYTBaseURL() {
         return 'https://www.youtube.com';
     }
 
@@ -72,7 +72,7 @@ export class Util extends null {
         }
     }
 
-    static addMetadataToFormat(format: YoutubeVideoFormat): YoutubeVideoFormat {
+    static getMetadataFormat(format: YoutubeVideoFormat): YoutubeVideoFormat {
         format = { ...formats[format.itag as keyof typeof formats], ...format };
         format.hasVideo = Boolean(format.qualityLabel);
         format.hasAudio = Boolean(format.audioBitrate);
@@ -111,7 +111,7 @@ export class Util extends null {
                             format.fps = Number(representation['$frameRate']);
                         }
 
-                        dashFormats.push(Util.addMetadataToFormat(format));
+                        dashFormats.push(Util.getMetadataFormat(format));
                     }
                 }
             }
@@ -138,7 +138,7 @@ export class Util extends null {
                             codec: reservedFormat.mimeType.split('"')[1]
                         };
 
-                        hlsFormats.push(Util.addMetadataToFormat(format));
+                        hlsFormats.push(Util.getMetadataFormat(format));
                     }
                 }
             }

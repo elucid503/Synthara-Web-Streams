@@ -104,57 +104,57 @@ export class YoutubeVideo {
     get formats(): YoutubeVideoFormat[] {
         const arr = [...(this.liveFormats ?? [])];
 
-        for (const format of [
+        for (const rawFormat of [
             ...(this.json.streamingData?.adaptiveFormats ?? []),
             ...(this.json.streamingData?.formats ?? [])
         ] as any[]) {
-            let frmt: YoutubeVideoFormat = {
-                itag: format.itag,
-                url: format.url,
-                mimeType: format.mimeType,
-                type: format.mimeType.split(';')[0],
-                codec: format.mimeType.split('"')[1],
-                bitrate: format.bitrate,
-                width: format.width,
-                height: format.height,
+            let format: YoutubeVideoFormat = {
+                itag: rawFormat.itag,
+                url: rawFormat.url,
+                mimeType: rawFormat.mimeType,
+                type: rawFormat.mimeType.split(';')[0],
+                codec: rawFormat.mimeType.split('"')[1],
+                bitrate: rawFormat.bitrate,
+                width: rawFormat.width,
+                height: rawFormat.height,
                 initRange: {
-                    start: Number(format.initRange?.start),
-                    end: Number(format.initRange?.end)
+                    start: Number(rawFormat.initRange?.start),
+                    end: Number(rawFormat.initRange?.end)
                 },
                 indexRange: {
-                    start: Number(format.indexRange?.start),
-                    end: Number(format.indexRange?.end)
+                    start: Number(rawFormat.indexRange?.start),
+                    end: Number(rawFormat.indexRange?.end)
                 },
-                lastModifiedTimestamp: Number(format.lastModified),
-                contentLength: Number(format.contentLength),
-                quality: format.quality,
-                fps: format.fps,
-                qualityLabel: format.qualityLabel,
-                projectionType: format.projectionType,
-                averageBitrate: format.averageBitrate,
-                approxDurationMs: Number(format.approxDurationMs),
-                signatureCipher: format.signatureCipher ?? format.cipher
+                lastModifiedTimestamp: Number(rawFormat.lastModified),
+                contentLength: Number(rawFormat.contentLength),
+                quality: rawFormat.quality,
+                fps: rawFormat.fps,
+                qualityLabel: rawFormat.qualityLabel,
+                projectionType: rawFormat.projectionType,
+                averageBitrate: rawFormat.averageBitrate,
+                approxDurationMs: Number(rawFormat.approxDurationMs),
+                signatureCipher: rawFormat.signatureCipher ?? rawFormat.cipher
             };
 
-            if (format.url && !frmt.signatureCipher) {
-                frmt.url = format.url;
+            if (rawFormat.url && !format.signatureCipher) {
+                format.url = rawFormat.url;
             }
 
-            if (!frmt.url) {
-                frmt = { ...frmt, ...queryParse(frmt.signatureCipher as string) };
+            if (!format.url) {
+                format = { ...format, ...queryParse(format.signatureCipher as string) };
             }
 
-            const url = new URL(decodeURIComponent(frmt.url as string));
+            const url = new URL(decodeURIComponent(format.url as string));
 
             url.searchParams.set('ratebypass', 'yes');
 
-            if (this.tokens && frmt.s) {
-                url.searchParams.set(frmt.sp ?? 'signature', decipher(this.tokens, frmt.s));
+            if (this.tokens && format.s) {
+                url.searchParams.set(format.sp ?? 'signature', decipher(this.tokens, format.s));
             }
 
-            frmt.url = url.toString();
+            format.url = url.toString();
 
-            arr.push(Util.addMetadataToFormat(frmt));
+            arr.push(Util.getMetadataFormat(format));
         }
 
         return arr;
@@ -297,7 +297,7 @@ export class YoutubeVideo {
     getHtml5Player(body: string): string {
         const playerURL = (Regexes.PLAYER_URL.exec(body) as RegExpExecArray)[1];
 
-        this.html5Player = `${Util.getBaseYTURL()}${playerURL}`;
+        this.html5Player = `${Util.getYTBaseURL()}${playerURL}`;
 
         return this.html5Player;
     }
