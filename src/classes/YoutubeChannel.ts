@@ -29,12 +29,8 @@ export class YoutubeChannel {
         this.json = json;
     }
 
-    get url() {
+    get url(): string {
         return `${Util.getYTChannelURL()}/${this.json.header.c4TabbedHeaderRenderer.channelId}`;
-    }
-
-    get<K extends keyof YoutubeChannelInfo>(key: K): YoutubeChannelInfo[K] {
-        return this.details[key];
     }
 
     get details(): YoutubeChannelInfo {

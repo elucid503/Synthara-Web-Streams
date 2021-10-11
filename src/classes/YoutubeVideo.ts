@@ -97,8 +97,12 @@ export class YoutubeVideo {
         this.json = json;
     }
 
-    get url() {
+    get url(): string {
         return `${Util.getYTVideoURL()}${this.json.videoDetails.videoId}`;
+    }
+
+    get info(): YoutubeVideoDetails & { formats: YoutubeVideoFormat[] } {
+        return { ...this.details, formats: this.formats };
     }
 
     get formats(): YoutubeVideoFormat[] {
@@ -160,7 +164,7 @@ export class YoutubeVideo {
         return arr;
     }
 
-    download(format: YoutubeVideoFormat, options: DownloadOptions = {}) {
+    download(format: YoutubeVideoFormat, options: DownloadOptions = {}): m3u8stream.Stream | PassThrough {
         if (format.isHLS || format.isDashMPD) {
             return m3u8stream(format.url as string, {
                 id: String(format.itag),
@@ -290,10 +294,6 @@ export class YoutubeVideo {
         }
     }
 
-    get info(): YoutubeVideoDetails & { formats: YoutubeVideoFormat[] } {
-        return { ...this.details, formats: this.formats };
-    }
-
     getHtml5Player(body: string): string {
         const playerURL = (Regexes.PLAYER_URL.exec(body) as RegExpExecArray)[1];
 
@@ -302,9 +302,10 @@ export class YoutubeVideo {
         return this.html5Player;
     }
 
-    async fetchTokens() {
-        if (cachedTokens.has(this.html5Player as string) || this.tokens) {
-            this.tokens = cachedTokens.get(this.html5Player as string) ?? this.tokens;
+    async fetchTokens(): Promise<string[]> {
+        const existing = cachedTokens.get(this.html5Player as string);
+        if (existing) {
+            this.tokens = existing;
             return this.tokens;
         }
 

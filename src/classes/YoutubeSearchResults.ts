@@ -48,6 +48,8 @@ export interface YoutubeSearchChannelInfo extends YoutubeSearchBaseInfo {
     subscriberCountText: string;
 }
 
+export type YoutubeSearchInfo = YoutubeSearchVideoInfo | YoutubeSearchListInfo | YoutubeSearchChannelInfo;
+
 export class YoutubeSearchResults {
     private json: any;
     private limit: number;
@@ -57,12 +59,12 @@ export class YoutubeSearchResults {
         this.limit = limit;
     }
 
-    get estimatedResults() {
+    get estimatedResults(): number {
         return Number(this.json.estimatedResults);
     }
 
-    get results(): (YoutubeSearchVideoInfo | YoutubeSearchListInfo | YoutubeSearchChannelInfo)[] {
-        const arr: (YoutubeSearchVideoInfo | YoutubeSearchListInfo | YoutubeSearchChannelInfo)[] = [];
+    get results(): YoutubeSearchInfo[] {
+        const arr: YoutubeSearchInfo[] = [];
 
         const datas =
             this.json.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0]

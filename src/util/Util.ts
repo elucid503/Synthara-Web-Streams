@@ -8,35 +8,35 @@ const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|
 const validQueryDomains = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com'];
 
 export class Util extends null {
-    static getYTBaseURL() {
+    static getYTBaseURL(): string {
         return 'https://www.youtube.com';
     }
 
-    static getYTSearchURL() {
+    static getYTSearchURL(): string {
         return 'https://www.youtube.com/results';
     }
 
-    static getYTVideoURL() {
+    static getYTVideoURL(): string {
         return 'https://www.youtube.com/watch?v=';
     }
 
-    static getYTChannelURL() {
+    static getYTChannelURL(): string {
         return 'https://www.youtube.com/channel';
     }
 
-    static getYTTrendingURL() {
+    static getYTTrendingURL(): string {
         return 'https://www.youtube.com/feed/trending';
     }
 
-    static getYTUserURL() {
+    static getYTUserURL(): string {
         return 'https://www.youtube.com/user';
     }
 
-    static getYTPlaylistURL() {
+    static getYTPlaylistURL(): string {
         return 'https://www.youtube.com/playlist';
     }
 
-    static getYTApiBaseURL() {
+    static getYTApiBaseURL(): string {
         return 'https://www.youtube.com/youtubei/v1';
     }
 

@@ -3,7 +3,7 @@ import { SearchError } from '../classes/SearchError';
 import { YoutubeSearchResults } from '../classes/YoutubeSearchResults';
 import { ErrorCodes, Regexes } from '../util/constants';
 
-export async function getSearchInfo(url: string, limit: number) {
+export async function getSearchInfo(url: string, limit: number): Promise<YoutubeSearchResults> {
     const request = await axios.get<string>(url).catch(() => {});
     if (!request) {
         throw new SearchError(ErrorCodes.SEARCH_FAILED);

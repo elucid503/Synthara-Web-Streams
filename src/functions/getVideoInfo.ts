@@ -4,7 +4,7 @@ import { YoutubeVideo } from '../classes/YoutubeVideo';
 import { ErrorCodes, Regexes } from '../util/constants';
 import { Util } from '../util/Util';
 
-export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = false) {
+export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = false): Promise<YoutubeVideo> {
     const videoId = Util.getVideoId(urlOrId);
     if (!videoId) {
         throw new TypeError(ErrorCodes.INVALID_URL);

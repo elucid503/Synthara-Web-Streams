@@ -1,3 +1,5 @@
+import m3u8stream from 'm3u8stream';
+import { PassThrough } from 'stream';
 import { getVideoInfo } from './getVideoInfo';
 import { TypeError } from '../classes/TypeError';
 import { DownloadOptions } from '../classes/YoutubeVideo';
@@ -8,7 +10,7 @@ import { ErrorCodes } from '../util/constants';
  * @param urlOrId The url or id of the song to download its stream.
  * @param options The options to use for the song.
  */
-export async function download(urlOrId: string, options?: DownloadOptions) {
+export async function download(urlOrId: string, options?: DownloadOptions): Promise<m3u8stream.Stream | PassThrough> {
     const video = await getVideoInfo(urlOrId, true);
     // This format is playable video or audio.
     const playableFormats = video.formats.filter((f) =>

@@ -1,4 +1,5 @@
 import { getSearchInfo } from './getSearchInfo';
+import { YoutubeSearchInfo } from '../classes/YoutubeSearchResults';
 import { Util } from '../util/Util';
 
 const SearchType = {
@@ -17,7 +18,10 @@ export interface SearchOption {
  * @param query The query of the search.
  * @param options The options to use for the search.
  */
-export async function search(query: string, { type = 'video', limit = Infinity }: SearchOption = {}) {
+export async function search(
+    query: string,
+    { type = 'video', limit = Infinity }: SearchOption = {}
+): Promise<YoutubeSearchInfo[]> {
     const params = new URLSearchParams();
 
     params.append('search_query', query.replace(/ /g, '+'));

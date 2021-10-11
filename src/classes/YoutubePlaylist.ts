@@ -37,19 +37,19 @@ export class YoutubePlaylist {
         this.listId = listId;
     }
 
-    get url() {
+    get url(): string {
         return `${Util.getYTPlaylistURL()}?list=${this.listId}`;
     }
 
-    get title() {
+    get title(): string {
         return this.data?.title ?? '';
     }
 
-    get description() {
+    get description(): string {
         return this.data?.description ?? '';
     }
 
-    get context() {
+    get context(): typeof DEFAULT_CONTEXT {
         const context = { ...DEFAULT_CONTEXT };
 
         if (this.clientVersion) {
@@ -59,11 +59,11 @@ export class YoutubePlaylist {
         return context;
     }
 
-    allLoaded() {
+    allLoaded(): boolean {
         return Boolean(this.tracks.length > 0 && !this.token && this.apiKey);
     }
 
-    async fetch() {
+    async fetch(): Promise<void> {
         if (this.tracks.length === 0 || !this.token || !this.apiKey) {
             await this.fetchFirstPage();
             if (!this.token) {
@@ -100,8 +100,8 @@ export class YoutubePlaylist {
         }
     }
 
-    async fetchFirstPage() {
-        if (this.tracks.length > 0) {
+    async fetchFirstPage(): Promise<void> {
+        if (this.allLoaded()) {
             return;
         }
 
@@ -153,7 +153,7 @@ export class YoutubePlaylist {
         this.addTracks(tracks);
     }
 
-    private addTracks(tracks: any[]) {
+    private addTracks(tracks: any[]): void {
         for (const data of tracks) {
             const track = data.playlistVideoRenderer;
 
