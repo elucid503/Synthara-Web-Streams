@@ -105,8 +105,8 @@ export class YoutubeVideo {
         const arr = [...(this.liveFormats ?? [])];
 
         for (const rawFormat of [
-            ...(this.json.streamingData?.adaptiveFormats ?? []),
-            ...(this.json.streamingData?.formats ?? [])
+            ...(this.json.streamingData?.formats ?? []),
+            ...(this.json.streamingData?.adaptiveFormats ?? [])
         ] as any[]) {
             let format: YoutubeVideoFormat = {
                 itag: rawFormat.itag,
