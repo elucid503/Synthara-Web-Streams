@@ -4,7 +4,7 @@ import { Regexes } from '../util/constants';
 import { Util } from '../util/Util';
 
 /**
- * Gets a user's channel data, behaves same as getChannel method but it uses the author name or id.
+ * Same as getChannelInfo function but it uses the author name or id.
  * @param id The id or name of the owner.
  */
 export async function getUserInfo(id: string): Promise<YoutubeChannel> {

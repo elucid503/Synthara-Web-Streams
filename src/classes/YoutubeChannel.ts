@@ -6,13 +6,13 @@ export interface YoutubeChannelInfo {
     title: string;
     avatars: {
         url: string;
-        height: number;
         width?: number;
+        height: number;
     }[];
     banners: {
         url: string;
-        height: number;
         width?: number;
+        height: number;
     }[];
     description: string;
     subscriberCountText: string;

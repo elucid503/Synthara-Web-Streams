@@ -15,8 +15,8 @@ export interface YoutubeVideoDetails {
     title: string;
     thumbnails: {
         url: string;
-        height: string;
         width: string;
+        height: string;
     }[];
     description: string;
     duration: number;
@@ -111,7 +111,7 @@ export class YoutubeVideo {
         for (const rawFormat of [
             ...(this.json.streamingData?.formats ?? []),
             ...(this.json.streamingData?.adaptiveFormats ?? [])
-        ] as any[]) {
+        ]) {
             let format: YoutubeVideoFormat = {
                 itag: rawFormat.itag,
                 url: rawFormat.url,
@@ -213,7 +213,7 @@ export class YoutubeVideo {
                         }
                     });
 
-                    request.once('error', (error) => {
+                    request.once('error', (error: Error) => {
                         request?.destroy();
                         if (error.message === 'Status code: 403') {
                             // Retry download when error code is 403.
@@ -271,7 +271,7 @@ export class YoutubeVideo {
 
                 request.pipe(stream);
 
-                request.once('error', (error) => {
+                request.once('error', (error: Error) => {
                     request.destroy();
                     if (error.message === 'Status code: 403') {
                         // Retry download when error code is 403.

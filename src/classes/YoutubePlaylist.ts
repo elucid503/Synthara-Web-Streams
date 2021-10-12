@@ -8,9 +8,9 @@ export interface PlaylistVideo {
     url: string;
     title: string;
     thumbnails: {
+        url: string;
         width: number;
         height: number;
-        url: string;
     }[];
     index: number;
     duration: number;
