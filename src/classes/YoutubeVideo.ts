@@ -1,7 +1,6 @@
 import axios from 'axios';
 import miniget from 'miniget';
 import m3u8stream from 'm3u8stream';
-import { parse as queryParse } from 'querystring';
 import { PassThrough } from 'stream';
 import { download } from '../functions/download';
 import { decipher, extractTokens } from '../util/decipher';
@@ -67,7 +66,7 @@ export interface YoutubeVideoFormat {
     url?: string;
     /* Provided by itag format. */
     audioBitrate?: number | null;
-    /* These come from Util.getMetadataFormat(). */
+    /* Provided by Util.getMetadataFormat(). */
     hasAudio?: boolean;
     hasVideo?: boolean;
     isLive?: boolean;
@@ -141,7 +140,7 @@ export class YoutubeVideo {
             if (rawFormat.url && !format.signatureCipher) {
                 format.url = rawFormat.url;
             } else if (!rawFormat.url && format.signatureCipher) {
-                format = { ...format, ...queryParse(format.signatureCipher) };
+                format = { ...format, ...Object.fromEntries(new URLSearchParams(format.signatureCipher)) };
             }
 
             const url = new URL(format.url as string);
