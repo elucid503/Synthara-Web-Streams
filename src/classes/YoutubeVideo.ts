@@ -35,7 +35,6 @@ export interface YoutubeVideoDetails {
 
 export interface YoutubeVideoFormat {
     itag: number;
-    url: string;
     mimeType: string;
     codec: string;
     type: string;
@@ -64,11 +63,11 @@ export interface YoutubeVideoFormat {
     averageBitrate?: number;
     approxDurationMs?: number;
     signatureCipher?: string;
-
+    /* Provided by formats getter. */
+    url?: string;
     /* Provided by itag format. */
     audioBitrate?: number | null;
-
-    /* These come from metadata and not by youtube. */
+    /* These come from Util.getMetadataFormat(). */
     hasAudio?: boolean;
     hasVideo?: boolean;
     isLive?: boolean;
@@ -114,7 +113,6 @@ export class YoutubeVideo {
         ]) {
             let format: YoutubeVideoFormat = {
                 itag: rawFormat.itag,
-                url: rawFormat.url,
                 mimeType: rawFormat.mimeType,
                 type: rawFormat.mimeType.split(';')[0],
                 codec: rawFormat.mimeType.split('"')[1],
@@ -142,10 +140,8 @@ export class YoutubeVideo {
 
             if (rawFormat.url && !format.signatureCipher) {
                 format.url = rawFormat.url;
-            }
-
-            if (!format.url) {
-                format = { ...format, ...queryParse(format.signatureCipher as string) };
+            } else if (!rawFormat.url && format.signatureCipher) {
+                format = { ...format, ...queryParse(format.signatureCipher) };
             }
 
             const url = new URL(decodeURIComponent(format.url as string));
