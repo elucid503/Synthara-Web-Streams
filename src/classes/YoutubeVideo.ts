@@ -144,7 +144,7 @@ export class YoutubeVideo {
                 format = { ...format, ...queryParse(format.signatureCipher) };
             }
 
-            const url = new URL(decodeURIComponent(format.url as string));
+            const url = new URL(format.url as string);
 
             url.searchParams.set('ratebypass', 'yes');
 

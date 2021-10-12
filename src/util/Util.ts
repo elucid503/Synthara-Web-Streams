@@ -45,12 +45,12 @@ export class Util extends null {
             if (videoRegex.test(urlOrId) && !checkUrl) {
                 return urlOrId;
             }
-            const parsed = new URL(urlOrId);
-            let id = parsed.searchParams.get('v');
+            const url = new URL(urlOrId);
+            let id = url.searchParams.get('v');
             if (validPathDomains.test(urlOrId) && !id) {
-                const paths = parsed.pathname.split('/');
-                id = paths[parsed.hostname === 'youtu.be' ? 1 : 2].substring(0, 11);
-            } else if (!validQueryDomains.includes(parsed.hostname)) {
+                const paths = url.pathname.split('/');
+                id = paths[url.hostname === 'youtu.be' ? 1 : 2].substring(0, 11);
+            } else if (!validQueryDomains.includes(url.hostname)) {
                 return null;
             }
             return videoRegex.test(id ?? '') ? id : null;
@@ -64,9 +64,9 @@ export class Util extends null {
             if (listRegex.test(urlOrId) && !checkUrl) {
                 return urlOrId;
             }
-            const parsed = new URL(urlOrId);
-            const id = parsed.searchParams.get('list');
-            return validQueryDomains.includes(parsed.hostname) && listRegex.test(id ?? '') ? id : null;
+            const url = new URL(urlOrId);
+            const id = url.searchParams.get('list');
+            return validQueryDomains.includes(url.hostname) && listRegex.test(id ?? '') ? id : null;
         } catch {
             return null;
         }
@@ -85,7 +85,7 @@ export class Util extends null {
     static async getDashFormats(url: string): Promise<YoutubeVideoFormat[]> {
         const dashFormats: YoutubeVideoFormat[] = [];
         try {
-            const { data } = await axios.get<string>(new URL(url, Util.getYTVideoURL()).toString());
+            const { data } = await axios.get<string>(url);
             const xml = xmlParse(data, {
                 attributeNamePrefix: '$',
                 ignoreAttributes: false
@@ -122,7 +122,7 @@ export class Util extends null {
     static async getHlsFormats(url: string): Promise<YoutubeVideoFormat[]> {
         const hlsFormats: YoutubeVideoFormat[] = [];
         try {
-            const { data } = await axios.get<string>(new URL(url, Util.getYTVideoURL()).toString());
+            const { data } = await axios.get<string>(url);
 
             for (const line of data.split('\n')) {
                 if (/^https?:\/\//.test(line)) {

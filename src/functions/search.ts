@@ -22,13 +22,13 @@ export async function search(
     query: string,
     { type = 'video', limit = Infinity }: SearchOption = {}
 ): Promise<YoutubeSearchInfo[]> {
-    const params = new URLSearchParams();
+    const url = new URL(Util.getYTSearchURL());
 
-    params.append('search_query', query.replace(/ /g, '+'));
-    params.append('sp', SearchType[type]);
-    params.append('hl', 'en');
+    url.searchParams.set('search_query', query.replace(/ /g, '+'));
+    url.searchParams.set('sp', SearchType[type]);
+    url.searchParams.set('hl', 'en');
 
-    const { results } = await getSearchInfo(`${Util.getYTSearchURL()}?${params}`, limit);
+    const { results } = await getSearchInfo(url.toString(), limit);
 
     return results;
 }
