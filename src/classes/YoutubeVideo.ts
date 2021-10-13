@@ -75,12 +75,11 @@ export interface YoutubeVideoFormat {
 }
 
 export interface DownloadOptions {
-    chunkMode?: {
-        chunkSize?: number;
-    };
-    highWaterMark?: number;
     resource?: PassThrough;
+    highWaterMark?: number;
     begin?: number | string;
+    liveBuffer?: number;
+    chunkMode?: number | boolean;
     start?: number;
 }
 
@@ -166,7 +165,7 @@ export class YoutubeVideo {
                 parser: format.isHLS ? 'm3u8' : 'dash-mpd',
                 highWaterMark: options.highWaterMark ?? 64 * 1024,
                 begin: options.begin ?? (format.isLive ? Date.now() : 0),
-                liveBuffer: 4000,
+                liveBuffer: options.liveBuffer ?? 4000,
                 requestOptions: {
                     maxReconnects: Infinity,
                     maxRetries: 10,
@@ -181,7 +180,7 @@ export class YoutubeVideo {
                         highWaterMark: options.highWaterMark ?? 64 * 1024
                     });
 
-                const downloadChunkSize = options.chunkMode.chunkSize ?? 256 * 1024;
+                const downloadChunkSize = options.chunkMode === true ? 256 * 1024 : options.chunkMode;
 
                 let startBytes = options.start ?? 0,
                     endBytes = startBytes + downloadChunkSize;
