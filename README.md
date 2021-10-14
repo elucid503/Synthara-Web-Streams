@@ -18,7 +18,7 @@ const { createWriteStream } = require('fs');
     // Search video.
     const result = await search('no copyright music', { type: 'video' });
     // Get suitable stream for live video or music bots.
-    const stream = await download(result[0].url, { chunkMode: true });
+    const stream = await download(result[0].url);
     // Write to file.
     stream.pipe(createWriteStream('./auto_no_copyright_music.ogg'));
 })();

@@ -79,7 +79,7 @@ export interface DownloadOptions {
     highWaterMark?: number;
     begin?: number | string;
     liveBuffer?: number;
-    chunkMode?: number | boolean;
+    chunkSize?: number;
     start?: number;
 }
 
@@ -201,96 +201,39 @@ export class YoutubeVideo {
                     highWaterMark: options.highWaterMark ?? 64 * 1024
                 });
 
-            if (options.chunkMode) {
-                const downloadChunkSize = options.chunkMode === true ? 256 * 1024 : options.chunkMode;
+            const downloadChunkSize = options.chunkSize ?? 256 * 1024;
 
-                let startBytes = options.start ?? 0,
-                    endBytes = startBytes + downloadChunkSize;
+            let startBytes = options.start ?? 0,
+                endBytes = startBytes + downloadChunkSize;
 
-                let awaitDrain: (() => void) | null;
+            let awaitDrain: (() => void) | null;
 
-                let request: miniget.Stream | null;
+            let request: miniget.Stream | null;
 
-                stream.on('drain', () => {
-                    awaitDrain?.();
-                    awaitDrain = null;
-                });
+            stream.on('drain', () => {
+                awaitDrain?.();
+                awaitDrain = null;
+            });
 
-                stream.once('close', () => {
-                    request?.destroy();
-                    request?.removeAllListeners();
-                    request = null;
-                });
+            stream.once('close', () => {
+                request?.destroy();
+                request?.removeAllListeners();
+                request = null;
+            });
 
-                const getNextChunk = () => {
-                    request = miniget(format.url as string, {
-                        headers: {
-                            Range: `bytes=${startBytes}-${endBytes >= (format.contentLength as number) ? '' : endBytes}`
-                        }
-                    });
-
-                    request.once('error', (error: Error) => {
-                        request?.destroy();
-                        if (error.message === 'Status code: 403') {
-                            // Retry download when error code is 403.
-                            request?.removeAllListeners();
-                            request = null;
-                            options.resource = stream;
-                            options.start = startBytes;
-                            download(this.url, options);
-                        } else {
-                            stream.destroy(error);
-                        }
-                    });
-
-                    request.on('data', (chunk: Buffer) => {
-                        if (stream.destroyed) {
-                            request?.destroy();
-                            return;
-                        }
-                        startBytes += chunk.length;
-
-                        if (!stream.write(chunk)) {
-                            request?.pause();
-                            awaitDrain = () => request?.resume();
-                        }
-                    });
-
-                    request.once('end', () => {
-                        if (stream.destroyed || endBytes >= (format.contentLength as number)) {
-                            return;
-                        }
-                        endBytes = startBytes + downloadChunkSize;
-                        getNextChunk();
-                    });
-                };
-
-                getNextChunk();
-
-                return stream;
-            } else {
-                let startBytes = options.start ?? 0;
-
-                const request = miniget(format.url as string, {
+            const getNextChunk = () => {
+                request = miniget(format.url as string, {
                     headers: {
-                        Range: `bytes=${startBytes}-`
+                        Range: `bytes=${startBytes}-${endBytes >= (format.contentLength as number) ? '' : endBytes}`
                     }
                 });
 
-                stream.once('close', () => {
-                    request.destroy();
-                    request.unpipe(stream);
-                    request.removeAllListeners();
-                });
-
-                request.pipe(stream);
-
                 request.once('error', (error: Error) => {
-                    request.destroy();
+                    request?.destroy();
                     if (error.message === 'Status code: 403') {
                         // Retry download when error code is 403.
-                        request.unpipe(stream);
-                        request.removeAllListeners();
+                        request?.removeAllListeners();
+                        request = null;
                         options.resource = stream;
                         options.start = startBytes;
                         download(this.url, options);
@@ -300,11 +243,30 @@ export class YoutubeVideo {
                 });
 
                 request.on('data', (chunk: Buffer) => {
+                    if (stream.destroyed) {
+                        request?.destroy();
+                        return;
+                    }
                     startBytes += chunk.length;
+
+                    if (!stream.write(chunk)) {
+                        request?.pause();
+                        awaitDrain = () => request?.resume();
+                    }
                 });
 
-                return stream;
-            }
+                request.once('end', () => {
+                    if (stream.destroyed || endBytes >= (format.contentLength as number)) {
+                        return;
+                    }
+                    endBytes = startBytes + downloadChunkSize;
+                    getNextChunk();
+                });
+            };
+
+            getNextChunk();
+
+            return stream;
         }
     }
 
