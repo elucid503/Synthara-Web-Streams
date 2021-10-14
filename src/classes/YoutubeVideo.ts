@@ -102,6 +102,28 @@ export class YoutubeVideo {
         return { ...this.details, formats: this.formats };
     }
 
+    get details(): YoutubeVideoDetails {
+        return {
+            id: this.json.videoDetails.videoId,
+            url: `${Util.getYTVideoURL()}${this.json.videoDetails.videoId}`,
+            title: this.json.videoDetails.title,
+            thumbnails: this.json.videoDetails.thumbnail.thumbnails,
+            description: this.json.videoDetails.shortDescription,
+            duration: Number(this.json.videoDetails.lengthSeconds) * 1000,
+            viewCount: Number(this.json.videoDetails.viewCount),
+            author: this.json.videoDetails.author,
+            channelId: this.json.videoDetails.channelId,
+            keywords: this.json.videoDetails.keywords,
+            allowRatings: this.json.videoDetails.allowRatings,
+            averageRating: this.json.videoDetails.averageRating,
+            isOwnerViewing: this.json.videoDetails.isOwnerViewing,
+            isCrawlable: this.json.videoDetails.isCrawlable,
+            isUnpluggedCorpus: this.json.videoDetails.isUnpluggedCorpus,
+            isPrivate: this.json.videoDetails.isPrivate,
+            isLiveContent: this.json.videoDetails.isLiveContent
+        };
+    }
+
     get formats(): YoutubeVideoFormat[] {
         const arr = [...(this.liveFormats ?? [])];
 
@@ -215,7 +237,7 @@ export class YoutubeVideo {
                             request = null;
                             options.resource = stream;
                             options.start = startBytes;
-                            download(this.details.url, options);
+                            download(this.url, options);
                         } else {
                             stream.destroy(error);
                         }
@@ -271,7 +293,7 @@ export class YoutubeVideo {
                         request.removeAllListeners();
                         options.resource = stream;
                         options.start = startBytes;
-                        download(this.details.url, options);
+                        download(this.url, options);
                     } else {
                         stream.destroy(error);
                     }
@@ -310,27 +332,5 @@ export class YoutubeVideo {
         this.tokens = tokens;
 
         return tokens;
-    }
-
-    get details(): YoutubeVideoDetails {
-        return {
-            id: this.json.videoDetails.videoId,
-            url: `${Util.getYTVideoURL()}${this.json.videoDetails.videoId}`,
-            title: this.json.videoDetails.title,
-            thumbnails: this.json.videoDetails.thumbnail.thumbnails,
-            description: this.json.videoDetails.shortDescription,
-            duration: Number(this.json.videoDetails.lengthSeconds) * 1000,
-            viewCount: Number(this.json.videoDetails.viewCount),
-            author: this.json.videoDetails.author,
-            channelId: this.json.videoDetails.channelId,
-            keywords: this.json.videoDetails.keywords,
-            allowRatings: this.json.videoDetails.allowRatings,
-            averageRating: this.json.videoDetails.averageRating,
-            isOwnerViewing: this.json.videoDetails.isOwnerViewing,
-            isCrawlable: this.json.videoDetails.isCrawlable,
-            isUnpluggedCorpus: this.json.videoDetails.isUnpluggedCorpus,
-            isPrivate: this.json.videoDetails.isPrivate,
-            isLiveContent: this.json.videoDetails.isLiveContent
-        };
     }
 }
