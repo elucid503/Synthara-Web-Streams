@@ -244,11 +244,9 @@ export class YoutubeVideo {
 
                 request.on('data', (chunk: Buffer) => {
                     if (stream.destroyed) {
-                        request?.destroy();
                         return;
                     }
                     startBytes += chunk.length;
-
                     if (!stream.write(chunk)) {
                         request?.pause();
                         awaitDrain = () => request?.resume();
