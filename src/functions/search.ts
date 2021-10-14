@@ -6,7 +6,7 @@ const SearchType = {
     video: 'EgIQAQ%3D%3D',
     playlist: 'EgIQAw%3D%3D',
     channel: 'EgIQAg%3D%3D'
-};
+} as const;
 
 export interface SearchOption {
     type?: keyof typeof SearchType;

@@ -173,13 +173,13 @@ export class YoutubeVideo {
                 }
             });
         } else {
-            if (options.chunkMode) {
-                const stream =
-                    options.resource ??
-                    new PassThrough({
-                        highWaterMark: options.highWaterMark ?? 64 * 1024
-                    });
+            const stream =
+                options.resource ??
+                new PassThrough({
+                    highWaterMark: options.highWaterMark ?? 64 * 1024
+                });
 
+            if (options.chunkMode) {
                 const downloadChunkSize = options.chunkMode === true ? 256 * 1024 : options.chunkMode;
 
                 let startBytes = options.start ?? 0,
@@ -247,8 +247,6 @@ export class YoutubeVideo {
 
                 return stream;
             } else {
-                const stream = options.resource ?? new PassThrough({ highWaterMark: format.contentLength });
-
                 let startBytes = options.start ?? 0;
 
                 const request = miniget(format.url as string, {
