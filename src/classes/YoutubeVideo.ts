@@ -62,11 +62,14 @@ export interface YoutubeVideoFormat {
     averageBitrate?: number;
     approxDurationMs?: number;
     signatureCipher?: string;
-    /* Provided by formats getter. */
+
+    // Provided by formats getter.
     url?: string;
-    /* Provided by itag format. */
+
+    // Provided by itag format.
     audioBitrate?: number | null;
-    /* Provided by Util.getMetadataFormat(). */
+
+    // Provided by Util.getMetadataFormat().
     hasAudio?: boolean;
     hasVideo?: boolean;
     isLive?: boolean;

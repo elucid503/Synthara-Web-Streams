@@ -3,7 +3,7 @@
  */
 export const formats = {
     5: {
-        mimeType: 'video/flv; codecs="Sorenson H.283, mp3"',
+        mimeType: 'video/flv; codecs="Sorenson H.263, mp3"',
         qualityLabel: '240p',
         bitrate: 250000,
         audioBitrate: 64
@@ -87,7 +87,7 @@ export const formats = {
         audioBitrate: 192
     },
     46: {
-        mimeType: 'audio/webm; codecs="vp8, vorbis"',
+        mimeType: 'audio/webm; codecs="VP8, vorbis"',
         qualityLabel: '1080p',
         bitrate: null,
         audioBitrate: 192
