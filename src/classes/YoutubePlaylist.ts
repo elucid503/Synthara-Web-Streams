@@ -50,13 +50,11 @@ export class YoutubePlaylist {
     }
 
     get context(): typeof DEFAULT_CONTEXT {
-        const context = { ...DEFAULT_CONTEXT };
-
         if (this.clientVersion) {
-            context.client.clientVersion = this.clientVersion;
+            DEFAULT_CONTEXT.client.clientVersion = this.clientVersion;
         }
 
-        return context;
+        return DEFAULT_CONTEXT;
     }
 
     allLoaded(): boolean {

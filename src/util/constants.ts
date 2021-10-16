@@ -1,10 +1,10 @@
 export const DEFAULT_CONTEXT = {
     client: {
         hl: 'en',
-        utcOffsetMinutes: 0,
         gl: 'US',
         clientName: 'WEB',
-        clientVersion: ''
+        clientVersion: '',
+        utcOffsetMinutes: 0
     },
     user: {},
     request: {}
