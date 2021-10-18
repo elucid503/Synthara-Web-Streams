@@ -6,9 +6,9 @@
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npm run compile && gen-esm-wrapper dist/index.js dist/index.mjs",
+    "build": "npm run pretty && tsc && gen-esm-wrapper dist/index.js dist/index.mjs",
     "prepublish": "npm run build",
-    "compile": "tsc"
+    "pretty": "prettier --config .prettierrc 'src/*.ts' 'src/*/*.ts' --write"
   },
   "repository": {
     "url": "https://github.com/cjh980402/youtube-dlsr"
@@ -30,8 +30,9 @@
     "miniget": "^4.2.1"
   },
   "devDependencies": {
-    "@types/node": "^16.10.9",
+    "@types/node": "^16.11.1",
     "gen-esm-wrapper": "^1.1.3",
-    "prettier": "^2.4.1"
+    "prettier": "^2.4.1",
+    "typescript": "^4.4.4"
   }
 }
