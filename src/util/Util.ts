@@ -3,7 +3,7 @@ import { parse as xmlParse } from 'fast-xml-parser';
 import { formats } from './formats';
 import { YoutubeVideoFormat } from '../classes/YoutubeVideo';
 const videoRegex = /^[\w-]{11}$/;
-const listRegex = /^[\w-]{12,}$/;
+const listRegex = /^[A-Z]{2}[\w-]{10,}$/;
 const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts)\/)/;
 const validQueryDomains = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com'];
 
