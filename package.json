@@ -1,30 +1,23 @@
 {
   "name": "youtube-dlsr",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Simply used for youtube stream and search.",
-  "keywords": [
-    "youtube",
-    "stream",
-    "livestream",
-    "download",
-    "search"
-  ],
-  "homepage": "https://github.com/cjh980402/youtube-dlsr",
-  "bugs": "https://github.com/cjh980402/youtube-dlsr/issues",
   "license": "MIT",
   "author": "cjh980402 <9804cjh@naver.com> (https://github.com/cjh980402)",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "homepage": "https://github.com/cjh980402/youtube-dlsr",
   "repository": {
     "type": "git",
     "url": "https://github.com/cjh980402/youtube-dlsr"
   },
+  "bugs": "https://github.com/cjh980402/youtube-dlsr/issues",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "scripts": {
     "build": "npm run pretty && tsc && gen-esm-wrapper dist/index.js dist/index.mjs",
     "prepublish": "npm run build",
     "pretty": "prettier --config .prettierrc 'src/*.ts' 'src/*/*.ts' --write"
   },
+  "types": "dist/index.d.ts",
   "dependencies": {
     "axios": "^0.23.0",
     "fast-xml-parser": "^3.20.3",
@@ -36,5 +29,12 @@
     "gen-esm-wrapper": "^1.1.3",
     "prettier": "^2.4.1",
     "typescript": "^4.4.4"
-  }
+  },
+  "keywords": [
+    "download",
+    "livestream",
+    "search",
+    "stream",
+    "youtube"
+  ]
 }
