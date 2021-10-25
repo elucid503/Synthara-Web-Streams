@@ -185,7 +185,7 @@ export class YoutubeVideo {
 
     download(format: YoutubeVideoFormat, options: DownloadOptions = {}): m3u8stream.Stream | PassThrough {
         if (format.isHLS || format.isDashMPD) {
-            return m3u8stream(format.url as string, {
+            const stream = m3u8stream(format.url as string, {
                 id: String(format.itag),
                 parser: format.isHLS ? 'm3u8' : 'dash-mpd',
                 highWaterMark: options.highWaterMark ?? 64 * 1024,
@@ -197,6 +197,12 @@ export class YoutubeVideo {
                     backoff: { inc: 20, max: 100 }
                 }
             });
+
+            stream.once('close', () => {
+                stream.end();
+            });
+
+            return stream;
         } else {
             const stream =
                 options.resource ??

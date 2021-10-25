@@ -47,11 +47,11 @@ export class YoutubeTrending {
                     title: video.title.runs[0].text,
                     thumbnails: video.thumbnail.thumbnails,
                     publishedTimeAgo: video.publishedTimeText?.simpleText,
-                    description: video.descriptionSnippet?.runs.map((e: any) => e.text).join(''),
+                    description: video.descriptionSnippet?.runs.map((v: any) => v.text).join(''),
                     duration:
                         video.lengthText.simpleText
                             .split(':')
-                            .map((d: string) => Number(d))
+                            .map((v: string) => Number(v))
                             .reduce((acc: number, time: number) => 60 * acc + time) * 1000,
                     durationText: video.lengthText.simpleText,
                     viewCount: Number(video.viewCountText.simpleText.replace(/\D/g, '')),

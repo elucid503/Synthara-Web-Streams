@@ -66,9 +66,11 @@ export class YoutubeSearchResults {
     get results(): YoutubeSearchInfo[] {
         const arr: YoutubeSearchInfo[] = [];
 
-        const datas =
-            this.json.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0]
-                .itemSectionRenderer.contents;
+        const sectionListDatas =
+            this.json.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents.filter(
+                (c: any) => c.itemSectionRenderer
+            );
+        const datas = sectionListDatas[sectionListDatas.length - 1].itemSectionRenderer.contents;
 
         for (const data of datas) {
             const video = data.videoRenderer;
@@ -89,11 +91,11 @@ export class YoutubeSearchResults {
                     title: video.title.runs[0].text,
                     thumbnails: video.thumbnail.thumbnails,
                     publishedTimeAgo: video.publishedTimeText?.simpleText,
-                    description: video.detailedMetadataSnippets?.[0].snippetText.runs.map((e: any) => e.text).join(''),
+                    description: video.detailedMetadataSnippets?.[0].snippetText.runs.map((v: any) => v.text).join(''),
                     duration:
                         durationText
                             .split(':')
-                            .map((d: string) => Number(d))
+                            .map((v: string) => Number(v))
                             .reduce((acc: number, time: number) => 60 * acc + time) * 1000,
                     durationText: durationText,
                     viewCount: Number(rawViewCount.replace(/\D/g, '')),
