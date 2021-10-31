@@ -1,7 +1,7 @@
 import axios from 'axios';
 import miniget from 'miniget';
 import m3u8stream from 'm3u8stream';
-import { PassThrough } from 'stream';
+import { PassThrough } from 'node:stream';
 import { download } from '../functions/download';
 import { decipher, extractTokens } from '../util/decipher';
 import { Regexes } from '../util/constants';

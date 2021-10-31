@@ -1,5 +1,5 @@
 import m3u8stream from 'm3u8stream';
-import { PassThrough } from 'stream';
+import { PassThrough } from 'node:stream';
 import { getVideoInfo } from './getVideoInfo';
 import { TypeError } from '../classes/TypeError';
 import { DownloadOptions } from '../classes/YoutubeVideo';
