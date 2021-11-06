@@ -2,9 +2,9 @@ import { getSearchInfo } from './getSearchInfo';
 import { YoutubeSearchInfo } from '../classes/YoutubeSearchResults';
 
 const SearchType = {
-    video: 'EgIQAQ%253D%253D',
-    playlist: 'EgIQAw%253D%253D',
-    channel: 'EgIQAg%253D%253D',
+    video: 'EgIQAQ%3D%3D',
+    playlist: 'EgIQAw%3D%3D',
+    channel: 'EgIQAg%3D%3D',
     all: ''
 } as const;
 
@@ -22,7 +22,7 @@ export async function search(
     query: string,
     { type = 'all', limit = Infinity }: SearchOption = {}
 ): Promise<YoutubeSearchInfo[]> {
-    const { results } = await getSearchInfo(query.replace(/ /g, '+'), limit, SearchType[type]);
+    const { results } = await getSearchInfo(query, limit, SearchType[type]);
 
     return results;
 }

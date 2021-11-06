@@ -15,7 +15,7 @@ export async function getSearchInfo(query: string, limit: number, type: string):
 
         const { data: json } = await axios.post<any>(url.toString(), {
             context: YoutubeConfig.INNERTUBE_CONTEXT,
-            query
+            query: query.replace(/ /g, '+')
         });
 
         return new YoutubeSearchResults(json, limit);

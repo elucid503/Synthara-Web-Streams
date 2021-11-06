@@ -27,8 +27,8 @@ export interface PlaylistData {
 export class YoutubePlaylist {
     totalPageCount = 0;
     tracks: PlaylistVideo[] = [];
-    isMix: boolean;
     listId: string;
+    isMix: boolean;
     data?: PlaylistData;
 
     private token: string | null = null;
