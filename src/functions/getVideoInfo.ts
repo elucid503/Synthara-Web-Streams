@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { TypeError } from '../classes/TypeError';
 import { YoutubeVideo } from '../classes/YoutubeVideo';
-import { ErrorCodes, Regexes } from '../util/constants';
+import { YoutubeConfig } from '../util/config';
+import { ErrorCodes } from '../util/constants';
 import { Util } from '../util/Util';
 
 export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = false): Promise<YoutubeVideo> {
@@ -10,9 +11,13 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
         throw new TypeError(ErrorCodes.INVALID_URL);
     }
 
-    const { data } = await axios.get<string>(`${Util.getYTVideoURL()}${videoId}&has_verified=1&hl=en`);
-
-    const json = JSON.parse((Regexes.YOUTUBE_PLAYER_RESPONSE.exec(data) as RegExpExecArray)[1]);
+    const { data: json } = await axios.post<any>(
+        `${Util.getYTApiBaseURL()}/player?key=${YoutubeConfig.INNERTUBE_API_KEY}`,
+        {
+            context: YoutubeConfig.INNERTUBE_ANDROID_CONTEXT,
+            videoId
+        }
+    );
 
     if (json.playabilityStatus?.status === 'ERROR') {
         throw new Error(json.playabilityStatus.reason);
@@ -20,7 +25,6 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
 
     const video = new YoutubeVideo(json);
 
-    video.getHtml5Player(data);
     await video.fetchTokens();
 
     if (getLiveFormats) {

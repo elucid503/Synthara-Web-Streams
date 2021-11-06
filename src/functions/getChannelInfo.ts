@@ -1,12 +1,16 @@
 import axios from 'axios';
 import { YoutubeChannel } from '../classes/YoutubeChannel';
-import { Regexes } from '../util/constants';
+import { YoutubeConfig } from '../util/config';
 import { Util } from '../util/Util';
 
 export async function getChannelInfo(id: string): Promise<YoutubeChannel> {
-    const { data } = await axios.get<string>(`${Util.getYTChannelURL()}/${id}?hl=en`);
-
-    const json = JSON.parse((Regexes.YOUTUBE_INITIAL_DATA.exec(data) as RegExpExecArray)[1]);
+    const { data: json } = await axios.post<any>(
+        `${Util.getYTApiBaseURL()}/browse?key=${YoutubeConfig.INNERTUBE_API_KEY}`,
+        {
+            context: YoutubeConfig.INNERTUBE_CONTEXT,
+            browseId: id
+        }
+    );
 
     return new YoutubeChannel(json);
 }

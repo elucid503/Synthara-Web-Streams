@@ -3,8 +3,8 @@ import miniget from 'miniget';
 import m3u8stream from 'm3u8stream';
 import { PassThrough } from 'node:stream';
 import { download } from '../functions/download';
+import { YoutubeConfig } from '../util/config';
 import { decipher, extractTokens } from '../util/decipher';
-import { Regexes } from '../util/constants';
 import { Util } from '../util/Util';
 const cachedTokens: Map<string, string[]> = new Map();
 
@@ -277,26 +277,18 @@ export class YoutubeVideo {
         }
     }
 
-    getHtml5Player(body: string): string {
-        const playerURL = (Regexes.PLAYER_URL.exec(body) as RegExpExecArray)[1];
-
-        this.html5Player = `${Util.getYTBaseURL()}${playerURL}`;
-
-        return this.html5Player;
-    }
-
     async fetchTokens(): Promise<string[]> {
-        const existing = cachedTokens.get(this.html5Player as string);
+        const existing = cachedTokens.get(YoutubeConfig.PLAYER_JS_URL);
         if (existing) {
             this.tokens = existing;
             return this.tokens;
         }
 
-        const { data } = await axios.get<string>(this.html5Player as string);
+        const { data } = await axios.get<string>(`${Util.getYTBaseURL()}${YoutubeConfig.PLAYER_JS_URL}`);
 
         const tokens = extractTokens(data) as string[];
 
-        cachedTokens.set(this.html5Player as string, tokens);
+        cachedTokens.set(YoutubeConfig.PLAYER_JS_URL, tokens);
 
         this.tokens = tokens;
 

@@ -1,11 +1,11 @@
 import { getSearchInfo } from './getSearchInfo';
 import { YoutubeSearchInfo } from '../classes/YoutubeSearchResults';
-import { Util } from '../util/Util';
 
 const SearchType = {
-    video: 'EgIQAQ%3D%3D',
-    playlist: 'EgIQAw%3D%3D',
-    channel: 'EgIQAg%3D%3D'
+    video: 'EgIQAQ%253D%253D',
+    playlist: 'EgIQAw%253D%253D',
+    channel: 'EgIQAg%253D%253D',
+    all: ''
 } as const;
 
 export interface SearchOption {
@@ -20,15 +20,9 @@ export interface SearchOption {
  */
 export async function search(
     query: string,
-    { type = 'video', limit = Infinity }: SearchOption = {}
+    { type = 'all', limit = Infinity }: SearchOption = {}
 ): Promise<YoutubeSearchInfo[]> {
-    const url = new URL(Util.getYTSearchURL());
-
-    url.searchParams.set('search_query', query.replace(/ /g, '+'));
-    url.searchParams.set('sp', SearchType[type]);
-    url.searchParams.set('hl', 'en');
-
-    const { results } = await getSearchInfo(url.toString(), limit);
+    const { results } = await getSearchInfo(query.replace(/ /g, '+'), limit, SearchType[type]);
 
     return results;
 }
