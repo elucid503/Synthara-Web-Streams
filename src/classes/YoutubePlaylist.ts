@@ -160,7 +160,7 @@ export class YoutubePlaylist {
                         url: `${Util.getYTVideoURL()}${track.videoId}`,
                         title: track.title?.simpleText,
                         thumbnails: track.thumbnail?.thumbnails ?? [],
-                        index: Number(track.index?.simpleText ?? '0'),
+                        index: track.navigationEndpoint.watchEndpoint.index + 1,
                         duration:
                             durationText
                                 .split(':')

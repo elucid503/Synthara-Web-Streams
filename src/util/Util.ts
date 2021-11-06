@@ -28,10 +28,6 @@ export class Util extends null {
         return 'https://www.youtube.com/feed/trending';
     }
 
-    static getYTUserURL(): string {
-        return 'https://www.youtube.com/user';
-    }
-
     static getYTPlaylistURL(): string {
         return 'https://www.youtube.com/playlist';
     }

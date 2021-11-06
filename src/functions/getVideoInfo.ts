@@ -15,7 +15,7 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
         `${Util.getYTApiBaseURL()}/player?key=${YoutubeConfig.INNERTUBE_API_KEY}`,
         {
             context: YoutubeConfig.INNERTUBE_ANDROID_CONTEXT,
-            videoId
+            videoId: videoId
         }
     );
 
