@@ -44,7 +44,7 @@ export class YoutubeChannel {
             avatars: header.avatar.thumbnails,
             banners: header.banner.thumbnails,
             description: metadata.description,
-            subscriberCountText: header.subscriberCountText.simpleText,
+            subscriberCountText: header.subscriberCountText?.simpleText ?? '0 subscribers',
             isFamilySafe: metadata.isFamilySafe,
             keywords: metadata.keywords,
             rssUrl: metadata.rssUrl,

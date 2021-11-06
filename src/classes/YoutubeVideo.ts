@@ -170,7 +170,6 @@ export class YoutubeVideo {
             const url = new URL(format.url as string);
 
             url.searchParams.set('ratebypass', 'yes');
-
             if (this.tokens && format.s) {
                 url.searchParams.set(format.sp ?? 'signature', decipher(this.tokens, format.s));
             }
