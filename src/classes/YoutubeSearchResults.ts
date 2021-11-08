@@ -70,7 +70,7 @@ export class YoutubeSearchResults {
     }
 
     allLoaded(): boolean {
-        return this.results.length > 0 && !this.token;
+        return this.totalPageCount > 0 && !this.token;
     }
 
     async init(): Promise<void> {

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { YoutubeVideo } from '../classes/YoutubeVideo';
+import { YoutubeVideo, YoutubeVideoFormat } from '../classes/YoutubeVideo';
 import { YoutubeConfig } from '../util/config';
 import { ErrorCodes } from '../util/constants';
 import { Util } from '../util/Util';
@@ -30,7 +30,7 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
         const dashUrl = json.streamingData?.dashManifestUrl;
         const hlsUrl = json.streamingData?.hlsManifestUrl;
 
-        const pending: Promise<typeof video.liveFormats>[] = [];
+        const pending: Promise<YoutubeVideoFormat[]>[] = [];
         if (dashUrl) {
             pending.push(Util.getDashFormats(dashUrl));
         }

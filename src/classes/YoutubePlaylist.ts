@@ -50,7 +50,7 @@ export class YoutubePlaylist {
     }
 
     allLoaded(): boolean {
-        return this.tracks.length > 0 && !this.token;
+        return this.totalPageCount > 0 && !this.token;
     }
 
     async init(): Promise<void> {

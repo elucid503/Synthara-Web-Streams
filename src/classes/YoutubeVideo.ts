@@ -91,7 +91,6 @@ export class YoutubeVideo {
 
     liveFormats: YoutubeVideoFormat[] = [];
     normalFormats: YoutubeVideoFormat[] = [];
-    html5Player?: string;
     tokens?: string[];
 
     constructor(json: any) {
