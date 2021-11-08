@@ -89,12 +89,15 @@ export interface DownloadOptions {
 export class YoutubeVideo {
     private json: any;
 
-    liveFormats?: YoutubeVideoFormat[];
+    liveFormats: YoutubeVideoFormat[] = [];
+    normalFormats: YoutubeVideoFormat[] = [];
     html5Player?: string;
     tokens?: string[];
 
     constructor(json: any) {
         this.json = json;
+
+        this.addFormats([...(json.streamingData?.formats ?? []), ...(json.streamingData?.adaptiveFormats ?? [])]);
     }
 
     get url(): string {
@@ -128,58 +131,7 @@ export class YoutubeVideo {
     }
 
     get formats(): YoutubeVideoFormat[] {
-        const arr = [...(this.liveFormats ?? [])];
-
-        for (const rawFormat of [
-            ...(this.json.streamingData?.formats ?? []),
-            ...(this.json.streamingData?.adaptiveFormats ?? [])
-        ]) {
-            let format: YoutubeVideoFormat = {
-                itag: rawFormat.itag,
-                mimeType: rawFormat.mimeType,
-                type: rawFormat.mimeType.split(';')[0],
-                codec: rawFormat.mimeType.split('"')[1],
-                bitrate: rawFormat.bitrate,
-                width: rawFormat.width,
-                height: rawFormat.height,
-                initRange: {
-                    start: Number(rawFormat.initRange?.start),
-                    end: Number(rawFormat.initRange?.end)
-                },
-                indexRange: {
-                    start: Number(rawFormat.indexRange?.start),
-                    end: Number(rawFormat.indexRange?.end)
-                },
-                lastModifiedTimestamp: Number(rawFormat.lastModified),
-                contentLength: Number(rawFormat.contentLength),
-                quality: rawFormat.quality,
-                fps: rawFormat.fps,
-                qualityLabel: rawFormat.qualityLabel,
-                projectionType: rawFormat.projectionType,
-                averageBitrate: rawFormat.averageBitrate,
-                approxDurationMs: Number(rawFormat.approxDurationMs),
-                signatureCipher: rawFormat.signatureCipher ?? rawFormat.cipher
-            };
-
-            if (rawFormat.url && !format.signatureCipher) {
-                format.url = rawFormat.url;
-            } else if (!rawFormat.url && format.signatureCipher) {
-                format = { ...format, ...Object.fromEntries(new URLSearchParams(format.signatureCipher)) };
-            }
-
-            const url = new URL(format.url as string);
-
-            url.searchParams.set('ratebypass', 'yes');
-            if (this.tokens && format.s) {
-                url.searchParams.set(format.sp ?? 'signature', decipher(this.tokens, format.s));
-            }
-
-            format.url = url.toString();
-
-            arr.push(Util.getMetadataFormat(format));
-        }
-
-        return arr;
+        return [...this.liveFormats, ...this.normalFormats];
     }
 
     download(format: YoutubeVideoFormat, options: DownloadOptions = {}): m3u8stream.Stream | PassThrough {
@@ -292,5 +244,53 @@ export class YoutubeVideo {
         this.tokens = tokens;
 
         return tokens;
+    }
+
+    private addFormats(formats: any[]): void {
+        for (const rawFormat of formats) {
+            let format: YoutubeVideoFormat = {
+                itag: rawFormat.itag,
+                mimeType: rawFormat.mimeType,
+                type: rawFormat.mimeType.split(';')[0],
+                codec: rawFormat.mimeType.split('"')[1],
+                bitrate: rawFormat.bitrate,
+                width: rawFormat.width,
+                height: rawFormat.height,
+                initRange: {
+                    start: Number(rawFormat.initRange?.start),
+                    end: Number(rawFormat.initRange?.end)
+                },
+                indexRange: {
+                    start: Number(rawFormat.indexRange?.start),
+                    end: Number(rawFormat.indexRange?.end)
+                },
+                lastModifiedTimestamp: Number(rawFormat.lastModified),
+                contentLength: Number(rawFormat.contentLength),
+                quality: rawFormat.quality,
+                fps: rawFormat.fps,
+                qualityLabel: rawFormat.qualityLabel,
+                projectionType: rawFormat.projectionType,
+                averageBitrate: rawFormat.averageBitrate,
+                approxDurationMs: Number(rawFormat.approxDurationMs),
+                signatureCipher: rawFormat.signatureCipher ?? rawFormat.cipher
+            };
+
+            if (rawFormat.url && !format.signatureCipher) {
+                format.url = rawFormat.url;
+            } else if (!rawFormat.url && format.signatureCipher) {
+                format = { ...format, ...Object.fromEntries(new URLSearchParams(format.signatureCipher)) };
+            }
+
+            const url = new URL(format.url as string);
+
+            url.searchParams.set('ratebypass', 'yes');
+            if (this.tokens && format.s) {
+                url.searchParams.set(format.sp ?? 'signature', decipher(this.tokens, format.s));
+            }
+
+            format.url = url.toString();
+
+            this.normalFormats.push(Util.getMetadataFormat(format));
+        }
     }
 }

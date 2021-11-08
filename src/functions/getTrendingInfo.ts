@@ -13,6 +13,6 @@ export async function getTrendingInfo(): Promise<YoutubeTrending> {
     );
 
     return new YoutubeTrending(
-        json.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].shelfRenderer.content.expandedShelfContentsRenderer.items
+        json.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents
     );
 }

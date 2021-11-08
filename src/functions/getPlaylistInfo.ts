@@ -1,4 +1,3 @@
-import { TypeError } from '../classes/TypeError';
 import { YoutubePlaylist } from '../classes/YoutubePlaylist';
 import { ErrorCodes } from '../util/constants';
 import { Util } from '../util/Util';
@@ -6,15 +5,17 @@ import { Util } from '../util/Util';
 export async function getPlaylistInfo(urlOrId: string, getAllVideos: boolean = false): Promise<YoutubePlaylist> {
     const listId = Util.getListId(urlOrId);
     if (!listId) {
-        throw new TypeError(ErrorCodes.INVALID_URL);
+        throw new Error(ErrorCodes.INVALID_URL);
     }
 
     const playlist = new YoutubePlaylist(listId);
 
+    await playlist.init();
+
     if (getAllVideos) {
-        await playlist.fetch();
-    } else {
-        await playlist.fetchFirstPage();
+        while (!playlist.allLoaded()) {
+            await playlist.next();
+        }
     }
 
     return playlist;

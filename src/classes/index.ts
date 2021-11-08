@@ -1,5 +1,3 @@
-export * from './SearchError';
-export * from './TypeError';
 export * from './YoutubeChannel';
 export * from './YoutubePlaylist';
 export * from './YoutubeSearchResults';

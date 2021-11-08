@@ -28,20 +28,25 @@ export interface YoutubeTrendingVideo {
 }
 
 export class YoutubeTrending {
-    private json: any;
+    trends: YoutubeTrendingVideo[] = [];
 
     constructor(json: any) {
-        this.json = json;
+        for (const itemSection of json) {
+            const trends =
+                itemSection.itemSectionRenderer.contents[0].shelfRenderer.content.expandedShelfContentsRenderer?.items;
+
+            if (trends) {
+                this.addTrends(trends);
+            }
+        }
     }
 
-    get trends(): YoutubeTrendingVideo[] {
-        const arr: YoutubeTrendingVideo[] = [];
-
-        for (const data of this.json) {
+    private addTrends(trends: any[]): void {
+        for (const data of trends) {
             const video = data.videoRenderer;
 
             if (video) {
-                arr.push({
+                this.trends.push({
                     id: video.videoId,
                     url: `${Util.getYTVideoURL()}${video.videoId}`,
                     title: video.title.runs[0].text,
@@ -69,7 +74,5 @@ export class YoutubeTrending {
                 });
             }
         }
-
-        return arr;
     }
 }

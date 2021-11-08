@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { TypeError } from './TypeError';
 import { YoutubeConfig } from '../util/config';
 import { ErrorCodes } from '../util/constants';
 import { Util } from '../util/Util';
@@ -51,48 +50,10 @@ export class YoutubePlaylist {
     }
 
     allLoaded(): boolean {
-        return Boolean(this.tracks.length > 0 && !this.token);
+        return this.tracks.length > 0 && !this.token;
     }
 
-    async fetch(): Promise<void> {
-        if (this.tracks.length === 0 || !this.token) {
-            await this.fetchFirstPage();
-            if (!this.token) {
-                return;
-            }
-        }
-
-        if (!this.token) {
-            throw new TypeError(ErrorCodes.INVALID_TOKEN);
-        }
-
-        const { data: json } = await axios.post<any>(
-            `${Util.getYTApiBaseURL()}/browse?key=${YoutubeConfig.INNERTUBE_API_KEY}`,
-            {
-                context: YoutubeConfig.INNERTUBE_CONTEXT,
-                continuation: this.token
-            }
-        );
-
-        const tracks = json.onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems;
-
-        const renderer = tracks[tracks.length - 1].continuationItemRenderer;
-
-        if (renderer) {
-            this.token = renderer.continuationEndpoint.continuationCommand.token;
-            if (!this.token) {
-                throw new TypeError(ErrorCodes.INVALID_TOKEN);
-            }
-
-            this.addTracks(tracks);
-            await this.fetch();
-        } else {
-            this.token = null;
-            this.addTracks(tracks);
-        }
-    }
-
-    async fetchFirstPage(): Promise<void> {
+    async init(): Promise<void> {
         if (this.allLoaded()) {
             return;
         }
@@ -134,17 +95,28 @@ export class YoutubePlaylist {
                 json.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0]
                     .itemSectionRenderer.contents[0].playlistVideoListRenderer.contents;
 
-            const renderer = tracks[tracks.length - 1].continuationItemRenderer;
-
-            if (renderer) {
-                this.token = renderer.continuationEndpoint.continuationCommand.token;
-                if (!this.token) {
-                    throw new TypeError(ErrorCodes.INVALID_TOKEN);
-                }
-            }
-
             this.addTracks(tracks);
         }
+    }
+
+    async next(): Promise<void> {
+        if (!this.token) {
+            return;
+        }
+
+        const { data: json } = await axios.post<any>(
+            `${Util.getYTApiBaseURL()}/browse?key=${YoutubeConfig.INNERTUBE_API_KEY}`,
+            {
+                context: YoutubeConfig.INNERTUBE_CONTEXT,
+                continuation: this.token
+            }
+        );
+
+        this.token = null;
+
+        const tracks = json.onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems;
+
+        this.addTracks(tracks);
     }
 
     private addTracks(tracks: any[]): void {
@@ -172,6 +144,7 @@ export class YoutubePlaylist {
                 }
             } else {
                 const track = data.playlistVideoRenderer;
+                const renderer = data.continuationItemRenderer;
 
                 if (track) {
                     this.tracks.push({
@@ -184,6 +157,11 @@ export class YoutubePlaylist {
                         durationText: track.lengthText?.simpleText ?? '0:00',
                         isPlayable: track.isPlayable
                     });
+                } else if (renderer) {
+                    this.token = renderer.continuationEndpoint.continuationCommand.token;
+                    if (!this.token) {
+                        throw new Error(ErrorCodes.INVALID_TOKEN);
+                    }
                 }
             }
         }

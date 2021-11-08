@@ -1,3 +1,6 @@
+import axios from 'axios';
+import { YoutubeConfig } from '../util/config';
+import { ErrorCodes } from '../util/constants';
 import { Util } from '../util/Util';
 
 export interface YoutubeSearchBaseInfo {
@@ -51,28 +54,87 @@ export interface YoutubeSearchChannelInfo extends YoutubeSearchBaseInfo {
 export type YoutubeSearchInfo = YoutubeSearchVideoInfo | YoutubeSearchListInfo | YoutubeSearchChannelInfo;
 
 export class YoutubeSearchResults {
-    private json: any;
+    estimatedResults = 0;
+    totalPageCount = 0;
+    results: YoutubeSearchInfo[] = [];
+
+    private query: string;
     private limit: number;
+    private type: string;
+    private token: string | null = null;
 
-    constructor(json: any, limit: number) {
-        this.json = json;
+    constructor(query: string, limit: number, type: string) {
+        this.query = query;
         this.limit = limit;
+        this.type = type;
     }
 
-    get estimatedResults(): number {
-        return Number(this.json.estimatedResults);
+    allLoaded(): boolean {
+        return this.results.length > 0 && !this.token;
     }
 
-    get results(): YoutubeSearchInfo[] {
-        const arr: YoutubeSearchInfo[] = [];
+    async init(): Promise<void> {
+        if (this.allLoaded()) {
+            return;
+        }
 
-        const sectionListDatas =
-            this.json.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents.filter(
-                (c: any) => c.itemSectionRenderer
-            );
-        const datas = sectionListDatas[sectionListDatas.length - 1].itemSectionRenderer.contents;
+        const url = new URL(`${Util.getYTApiBaseURL()}/search`);
 
-        for (const data of datas) {
+        url.searchParams.set('key', YoutubeConfig.INNERTUBE_API_KEY);
+        if (this.type) {
+            url.searchParams.set('params', this.type);
+        }
+
+        const { data: json } = await axios.post<any>(url.toString(), {
+            context: YoutubeConfig.INNERTUBE_CONTEXT,
+            query: this.query.replace(/ /g, '+')
+        });
+
+        this.estimatedResults = Number(json.estimatedResults);
+
+        for (const section of json.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer
+            .contents) {
+            if (section.itemSectionRenderer) {
+                this.addResults(section.itemSectionRenderer.contents);
+            } else if (section.continuationItemRenderer) {
+                this.token = section.continuationItemRenderer.continuationEndpoint.continuationCommand.token;
+                if (!this.token) {
+                    throw new Error(ErrorCodes.INVALID_TOKEN);
+                }
+            }
+        }
+    }
+
+    async next(): Promise<void> {
+        if (!this.token) {
+            return;
+        }
+
+        const { data: json } = await axios.post<any>(
+            `${Util.getYTApiBaseURL()}/search?key=${YoutubeConfig.INNERTUBE_API_KEY}`,
+            {
+                context: YoutubeConfig.INNERTUBE_CONTEXT,
+                continuation: this.token
+            }
+        );
+
+        this.token = null;
+        this.estimatedResults = Number(json.estimatedResults);
+
+        for (const section of json.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems) {
+            if (section.itemSectionRenderer) {
+                this.addResults(section.itemSectionRenderer.contents);
+            } else if (section.continuationItemRenderer) {
+                this.token = section.continuationItemRenderer.continuationEndpoint.continuationCommand.token;
+                if (!this.token) {
+                    throw new Error(ErrorCodes.INVALID_TOKEN);
+                }
+            }
+        }
+    }
+
+    private addResults(results: any[]): void {
+        for (const data of results) {
             const video = data.videoRenderer;
             const list = data.playlistRenderer;
             const channel = data.channelRenderer;
@@ -84,7 +146,7 @@ export class YoutubeSearchResults {
                 const viewCountText: string =
                     video.shortViewCountText?.simpleText ?? video.shortViewCountText?.runs[0]?.text ?? '0 views';
 
-                arr.push({
+                this.results.push({
                     type: 'video',
                     id: video.videoId,
                     url: `${Util.getYTVideoURL()}${video.videoId}`,
@@ -112,7 +174,7 @@ export class YoutubeSearchResults {
                     }
                 });
             } else if (list) {
-                arr.push({
+                this.results.push({
                     type: 'playlist',
                     id: list.playlistId,
                     url: `${Util.getYTPlaylistURL()}?list=${list.playlistId}`,
@@ -130,7 +192,7 @@ export class YoutubeSearchResults {
             } else if (channel) {
                 const subscriberCountText: string = channel.subscriberCountText?.simpleText ?? '0 subscribers';
 
-                arr.push({
+                this.results.push({
                     type: 'channel',
                     id: channel.channelId,
                     url: `${Util.getYTChannelURL()}/${channel.channelId}`,
@@ -141,11 +203,11 @@ export class YoutubeSearchResults {
                 });
             }
 
-            if (arr.length === this.limit) {
+            if (this.results.length === this.limit) {
                 break;
             }
         }
 
-        return arr;
+        this.totalPageCount++;
     }
 }

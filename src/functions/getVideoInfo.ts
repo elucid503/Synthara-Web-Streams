@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { TypeError } from '../classes/TypeError';
 import { YoutubeVideo } from '../classes/YoutubeVideo';
 import { YoutubeConfig } from '../util/config';
 import { ErrorCodes } from '../util/constants';
@@ -8,7 +7,7 @@ import { Util } from '../util/Util';
 export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = false): Promise<YoutubeVideo> {
     const videoId = Util.getVideoId(urlOrId);
     if (!videoId) {
-        throw new TypeError(ErrorCodes.INVALID_URL);
+        throw new Error(ErrorCodes.INVALID_URL);
     }
 
     const { data: json } = await axios.post<any>(
@@ -31,7 +30,6 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
         const dashUrl = json.streamingData?.dashManifestUrl;
         const hlsUrl = json.streamingData?.hlsManifestUrl;
 
-        video.liveFormats = [];
         const pending: Promise<typeof video.liveFormats>[] = [];
         if (dashUrl) {
             pending.push(Util.getDashFormats(dashUrl));

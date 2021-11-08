@@ -16,7 +16,7 @@ const { createWriteStream } = require('fs');
 
 (async () => {
     // Search video.
-    const result = await search('no copyright music', { type: 'video' });
+    const result = await search('no copyright music', { type: 'video', limit: 1 });
     // Get suitable stream for live video or music bots.
     const stream = await download(result[0].url);
     // Write to file.
@@ -30,12 +30,25 @@ const { createWriteStream } = require('fs');
 
 (async () => {
     // Search video.
-    const result = await search('no copyright music', { type: 'video' });
+    const result = await search('no copyright music', { type: 'video', limit: 1 });
     // Get info of video.
     const video = await getVideoInfo(result[0].url);
     // Get stream of selected format.
     const stream = video.download(video.formats.find((f) => f.hasAudio));
     // Write to file.
     stream.pipe(createWriteStream('./manual_no_copyright_music.mp3'));
+})();
+```
+### Get playlist information
+```js
+const { getPlaylistInfo, search } = require('youtube-dlsr');
+
+(async () => {
+    // Search playlist.
+    const result = await search('no copyright music', { type: 'playlist', limit: 2 });
+    // Get first page info of playlist.
+    const list1 = await getPlaylistInfo(result[0].url);
+    // Get full page info of playlist.
+    const list2 = await getPlaylistInfo(result[1].url, true);
 })();
 ```

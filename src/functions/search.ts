@@ -20,7 +20,7 @@ export interface SearchOption {
  */
 export async function search(
     query: string,
-    { type = 'all', limit = Infinity }: SearchOption = {}
+    { type = 'all', limit = 10 }: SearchOption = {}
 ): Promise<YoutubeSearchInfo[]> {
     const { results } = await getSearchInfo(query, limit, SearchType[type]);
 

@@ -1,7 +1,6 @@
 import m3u8stream from 'm3u8stream';
 import { PassThrough } from 'node:stream';
 import { getVideoInfo } from './getVideoInfo';
-import { TypeError } from '../classes/TypeError';
 import { DownloadOptions } from '../classes/YoutubeVideo';
 import { ErrorCodes } from '../util/constants';
 
@@ -22,7 +21,7 @@ export async function download(urlOrId: string, options?: DownloadOptions): Prom
     // Choose last available format because format is ascending order.
     const format = liveOrOpus[liveOrOpus.length - 1] ?? playableFormats[playableFormats.length - 1];
     if (!format) {
-        throw new TypeError(ErrorCodes.NO_SUITABLE_FORMAT);
+        throw new Error(ErrorCodes.NO_SUITABLE_FORMAT);
     }
 
     return video.download(format, options);
