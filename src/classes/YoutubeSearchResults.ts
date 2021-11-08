@@ -135,6 +135,10 @@ export class YoutubeSearchResults {
 
     private addResults(results: any[]): void {
         for (const data of results) {
+            if (this.results.length >= this.limit) {
+                break;
+            }
+
             const video = data.videoRenderer;
             const list = data.playlistRenderer;
             const channel = data.channelRenderer;
@@ -201,10 +205,6 @@ export class YoutubeSearchResults {
                     verified: Boolean(channel.ownerBadges?.[0]?.metadataBadgeRenderer?.style?.includes('VERIFIED')),
                     subscriberCountText: subscriberCountText
                 });
-            }
-
-            if (this.results.length === this.limit) {
-                break;
             }
         }
 
