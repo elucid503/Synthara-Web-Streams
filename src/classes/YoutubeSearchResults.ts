@@ -58,12 +58,12 @@ export class YoutubeSearchResults {
     totalPageCount = 0;
     results: YoutubeSearchInfo[] = [];
 
+    private token: string | null = null;
     private query: string;
     private limit: number;
-    private type: string;
-    private token: string | null = null;
+    private type?: string;
 
-    constructor(query: string, limit: number, type: string) {
+    constructor(query: string, limit: number, type?: string) {
         this.query = query;
         this.limit = limit;
         this.type = type;
@@ -78,17 +78,14 @@ export class YoutubeSearchResults {
             return;
         }
 
-        const url = new URL(`${Util.getYTApiBaseURL()}/search`);
-
-        url.searchParams.set('key', YoutubeConfig.INNERTUBE_API_KEY);
-        if (this.type) {
-            url.searchParams.set('params', this.type);
-        }
-
-        const { data: json } = await axios.post<any>(url.toString(), {
-            context: YoutubeConfig.INNERTUBE_CONTEXT,
-            query: this.query.replace(/ /g, '+')
-        });
+        const { data: json } = await axios.post<any>(
+            `${Util.getYTApiBaseURL()}/search?key=${YoutubeConfig.INNERTUBE_API_KEY}`,
+            {
+                context: YoutubeConfig.INNERTUBE_CONTEXT,
+                query: this.query,
+                params: this.type ?? ''
+            }
+        );
 
         this.estimatedResults = Number(json.estimatedResults);
 
