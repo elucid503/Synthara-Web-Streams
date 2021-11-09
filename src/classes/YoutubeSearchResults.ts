@@ -1,57 +1,10 @@
 import axios from 'axios';
+import { YoutubeCompactVideoInfo, YoutubeCompactListInfo, YoutubeCompactChannelInfo } from './YoutubeCompactInfo';
 import { YoutubeConfig } from '../util/config';
 import { ErrorCodes } from '../util/constants';
 import { Util } from '../util/Util';
 
-export interface YoutubeSearchBaseInfo {
-    type: 'video' | 'playlist' | 'channel';
-    id: string;
-    url: string;
-    title: string;
-    thumbnails: {
-        url: string;
-        width: string;
-        height: string;
-    }[];
-}
-
-export interface YoutubeSearchVideoInfo extends YoutubeSearchBaseInfo {
-    type: 'video';
-    publishedTimeAgo?: string;
-    description?: string;
-    duration: number;
-    durationText: string;
-    viewCount: number;
-    viewCountText: string;
-    channel: {
-        id: string;
-        url: string;
-        title: string;
-        thumbnails: {
-            url: string;
-            width: number;
-            height: number;
-        }[];
-    };
-}
-
-export interface YoutubeSearchListInfo extends YoutubeSearchBaseInfo {
-    type: 'playlist';
-    videoCount: number;
-    channel: {
-        id: string;
-        url: string;
-        title: string;
-    };
-}
-
-export interface YoutubeSearchChannelInfo extends YoutubeSearchBaseInfo {
-    type: 'channel';
-    verified: boolean;
-    subscriberCountText: string;
-}
-
-export type YoutubeSearchInfo = YoutubeSearchVideoInfo | YoutubeSearchListInfo | YoutubeSearchChannelInfo;
+export type YoutubeSearchInfo = YoutubeCompactVideoInfo | YoutubeCompactListInfo | YoutubeCompactChannelInfo;
 
 export class YoutubeSearchResults {
     estimatedResults = 0;
@@ -67,6 +20,15 @@ export class YoutubeSearchResults {
         this.query = query;
         this.limit = limit;
         this.type = type;
+    }
+
+    get url(): string {
+        const url = new URL(Util.getYTSearchURL());
+        url.searchParams.set('search_query', this.query);
+        if (this.type) {
+            url.searchParams.set('sp', this.type);
+        }
+        return url.toString();
     }
 
     allLoaded(): boolean {

@@ -45,7 +45,7 @@ export class Util extends null {
             let id = url.searchParams.get('v');
             if (validPathDomains.test(urlOrId) && !id) {
                 const paths = url.pathname.split('/');
-                id = paths[url.hostname === 'youtu.be' ? 1 : 2].substring(0, 11);
+                id = paths[url.hostname === 'youtu.be' ? 1 : 2].slice(0, 11);
             } else if (!validQueryDomains.includes(url.hostname)) {
                 return null;
             }

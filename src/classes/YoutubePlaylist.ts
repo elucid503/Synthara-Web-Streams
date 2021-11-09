@@ -1,34 +1,16 @@
 import axios from 'axios';
+import { YoutubeListVideoInfo } from './YoutubeCompactInfo';
 import { YoutubeConfig } from '../util/config';
 import { ErrorCodes } from '../util/constants';
 import { Util } from '../util/Util';
 
-export interface PlaylistVideo {
-    id: string;
-    url: string;
-    title: string;
-    thumbnails: {
-        url: string;
-        width: number;
-        height: number;
-    }[];
-    index: number;
-    duration: number;
-    durationText: string;
-    isPlayable: boolean;
-}
-
-export interface PlaylistData {
-    title: string;
-    description: string;
-}
-
 export class YoutubePlaylist {
     totalPageCount = 0;
-    tracks: PlaylistVideo[] = [];
+    title = '';
+    description = '';
+    tracks: YoutubeListVideoInfo[] = [];
     listId: string;
     isMix: boolean;
-    data?: PlaylistData;
 
     private token: string | null = null;
 
@@ -39,14 +21,6 @@ export class YoutubePlaylist {
 
     get url(): string {
         return `${Util.getYTPlaylistURL()}?list=${this.listId}`;
-    }
-
-    get title(): string {
-        return this.data?.title ?? '';
-    }
-
-    get description(): string {
-        return this.data?.description ?? '';
     }
 
     allLoaded(): boolean {
@@ -69,10 +43,7 @@ export class YoutubePlaylist {
 
             const { playlist } = json.contents.twoColumnWatchNextResults.playlist;
 
-            this.data = {
-                title: playlist.title,
-                description: ''
-            };
+            this.title = playlist.title;
 
             this.addTracks(playlist.contents);
         } else {
@@ -86,10 +57,8 @@ export class YoutubePlaylist {
 
             const metadata = json.metadata.playlistMetadataRenderer;
 
-            this.data = {
-                title: metadata.title,
-                description: metadata.description
-            };
+            this.title = metadata.title;
+            this.description = metadata.description;
 
             const tracks =
                 json.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0]
@@ -128,6 +97,7 @@ export class YoutubePlaylist {
                     const durationText: string = track.lengthText?.simpleText ?? '0:00';
 
                     this.tracks.push({
+                        type: 'video',
                         id: track.videoId,
                         url: `${Util.getYTVideoURL()}${track.videoId}`,
                         title: track.title?.simpleText,
@@ -148,6 +118,7 @@ export class YoutubePlaylist {
 
                 if (track) {
                     this.tracks.push({
+                        type: 'video',
                         id: track.videoId,
                         url: `${Util.getYTVideoURL()}${track.videoId}`,
                         title: track.title?.runs?.[0].text,

@@ -30,22 +30,19 @@ export function decipher(tokens: string[], sig: string): string {
     let arr = sig.split('');
 
     for (const token of tokens) {
-        let position: number;
+        const position = ~~token.slice(1);
 
         switch (token[0]) {
             case 'r':
-                arr = arr.reverse();
+                arr.reverse();
                 break;
             case 's':
-                position = ~~token.slice(1);
                 arr = arr.slice(position);
                 break;
             case 'p':
-                position = ~~token.slice(1);
                 arr.splice(0, position);
                 break;
             case 'w':
-                position = ~~token.slice(1);
                 [arr[0], arr[position % arr.length]] = [arr[position % arr.length], arr[0]];
                 break;
         }
@@ -83,8 +80,7 @@ export function extractTokens(body: string): string[] | null {
         .replace(/\$|^'|^"|'$|"$/g, '');
 
     const keys = `(${reverseKey}|${sliceKey}|${spliceKey}|${swapKey})`;
-    const tokenreg = `(?:a=)?${obj}(?:\\.${keys}|\\[(?:'${keys}'|"${keys}")\\])\\(a,(\\d+)\\)`;
-    const tokenizeRegexp = new RegExp(tokenreg, 'g');
+    const tokenizeRegexp = new RegExp(`(?:a=)?${obj}(?:\\.${keys}|\\[(?:'${keys}'|"${keys}")\\])\\(a,(\\d+)\\)`, 'g');
     const tokens: string[] = [];
     for (const result of funcBody.matchAll(tokenizeRegexp)) {
         const key = result[1] || result[2] || result[3];

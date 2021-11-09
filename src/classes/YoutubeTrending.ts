@@ -1,34 +1,8 @@
+import { YoutubeCompactVideoInfo } from './YoutubeCompactInfo';
 import { Util } from '../util/Util';
 
-export interface YoutubeTrendingVideo {
-    id: string;
-    url: string;
-    title: string;
-    thumbnails: {
-        url: string;
-        width: string;
-        height: string;
-    }[];
-    publishedTimeAgo?: string;
-    description?: string;
-    duration: number;
-    durationText: string;
-    viewCount: number;
-    viewCountText: string;
-    channel: {
-        id: string;
-        url: string;
-        title: string;
-        thumbnails: {
-            url: string;
-            width: number;
-            height: number;
-        }[];
-    };
-}
-
 export class YoutubeTrending {
-    trends: YoutubeTrendingVideo[] = [];
+    trends: YoutubeCompactVideoInfo[] = [];
 
     constructor(json: any) {
         for (const itemSection of json) {
@@ -41,12 +15,17 @@ export class YoutubeTrending {
         }
     }
 
+    get url(): string {
+        return Util.getYTTrendingURL();
+    }
+
     private addTrends(trends: any[]): void {
         for (const data of trends) {
             const video = data.videoRenderer;
 
             if (video) {
                 this.trends.push({
+                    type: 'video',
                     id: video.videoId,
                     url: `${Util.getYTVideoURL()}${video.videoId}`,
                     title: video.title.runs[0].text,

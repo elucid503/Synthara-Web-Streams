@@ -1,17 +1,17 @@
 import { Util } from '../util/Util';
 
-export interface YoutubeChannelInfo {
+export interface YoutubeChannelDetails {
     id: string;
     url: string;
     title: string;
     avatars: {
         url: string;
-        width?: number;
+        width: number;
         height: number;
     }[];
     banners: {
         url: string;
-        width?: number;
+        width: number;
         height: number;
     }[];
     description: string;
@@ -33,7 +33,7 @@ export class YoutubeChannel {
         return `${Util.getYTChannelURL()}/${this.json.header.c4TabbedHeaderRenderer.channelId}`;
     }
 
-    get details(): YoutubeChannelInfo {
+    get details(): YoutubeChannelDetails {
         const header = this.json.header.c4TabbedHeaderRenderer;
         const metadata = this.json.metadata.channelMetadataRenderer;
 

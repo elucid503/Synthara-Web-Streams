@@ -30,6 +30,7 @@ export interface YoutubeVideoDetails {
     isUnpluggedCorpus: boolean;
     isPrivate: boolean;
     isLiveContent: boolean;
+    formats: YoutubeVideoFormat[];
 }
 
 export interface YoutubeVideoFormat {
@@ -103,10 +104,6 @@ export class YoutubeVideo {
         return `${Util.getYTVideoURL()}${this.json.videoDetails.videoId}`;
     }
 
-    get info(): YoutubeVideoDetails & { formats: YoutubeVideoFormat[] } {
-        return { ...this.details, formats: this.formats };
-    }
-
     get details(): YoutubeVideoDetails {
         return {
             id: this.json.videoDetails.videoId,
@@ -125,7 +122,8 @@ export class YoutubeVideo {
             isCrawlable: this.json.videoDetails.isCrawlable,
             isUnpluggedCorpus: this.json.videoDetails.isUnpluggedCorpus,
             isPrivate: this.json.videoDetails.isPrivate,
-            isLiveContent: this.json.videoDetails.isLiveContent
+            isLiveContent: this.json.videoDetails.isLiveContent,
+            formats: this.formats
         };
     }
 
