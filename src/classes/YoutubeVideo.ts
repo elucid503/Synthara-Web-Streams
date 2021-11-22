@@ -1,12 +1,10 @@
-import axios from 'axios';
 import miniget from 'miniget';
 import m3u8stream from 'm3u8stream';
 import { PassThrough } from 'node:stream';
 import { download } from '../functions/download';
 import { YoutubeConfig } from '../util/config';
-import { decipher, extractTokens } from '../util/decipher';
+import { decipher } from '../util/decipher';
 import { Util } from '../util/Util';
-const cachedTokens: Map<string, string[]> = new Map();
 
 export interface YoutubeVideoDetails {
     id: string;
@@ -225,24 +223,6 @@ export class YoutubeVideo {
         }
     }
 
-    async fetchTokens(): Promise<string[]> {
-        const existing = cachedTokens.get(YoutubeConfig.PLAYER_JS_URL);
-        if (existing) {
-            this.tokens = existing;
-            return this.tokens;
-        }
-
-        const { data } = await axios.get<string>(`${Util.getYTBaseURL()}${YoutubeConfig.PLAYER_JS_URL}`);
-
-        const tokens = extractTokens(data) as string[];
-
-        cachedTokens.set(YoutubeConfig.PLAYER_JS_URL, tokens);
-
-        this.tokens = tokens;
-
-        return tokens;
-    }
-
     private addFormats(formats: any[]): void {
         for (const rawFormat of formats) {
             let format: YoutubeVideoFormat = {
@@ -281,8 +261,8 @@ export class YoutubeVideo {
             const url = new URL(format.url as string);
 
             url.searchParams.set('ratebypass', 'yes');
-            if (this.tokens && format.s) {
-                url.searchParams.set(format.sp ?? 'signature', decipher(this.tokens, format.s));
+            if (YoutubeConfig.PLAYER_TOKENS && format.s) {
+                url.searchParams.set(format.sp ?? 'signature', decipher(YoutubeConfig.PLAYER_TOKENS, format.s));
             }
 
             format.url = url.toString();

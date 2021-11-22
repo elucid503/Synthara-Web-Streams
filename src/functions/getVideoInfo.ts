@@ -24,8 +24,6 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
 
     const video = new YoutubeVideo(json);
 
-    await video.fetchTokens();
-
     if (getLiveFormats) {
         const dashUrl = json.streamingData?.dashManifestUrl;
         const hlsUrl = json.streamingData?.hlsManifestUrl;

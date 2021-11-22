@@ -1,17 +1,18 @@
 import axios from 'axios';
+import { extractTokens } from './decipher';
 import { Util } from './Util';
 
 export class YoutubeConfig extends null {
     static INNERTUBE_API_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';
     static INNERTUBE_API_VERSION = 'v1';
     static INNERTUBE_CLIENT_NAME = 'WEB';
-    static INNERTUBE_CLIENT_VERSION = '2.20211104.02.00';
+    static INNERTUBE_CLIENT_VERSION = '2.20211119.01.00';
     static INNERTUBE_CONTEXT = {
         client: {
             hl: 'en',
             gl: 'US',
             clientName: 'WEB',
-            clientVersion: '2.20211104.02.00',
+            clientVersion: '2.20211119.01.00',
             utcOffsetMinutes: 0
         },
         user: {},
@@ -22,13 +23,14 @@ export class YoutubeConfig extends null {
             hl: 'en',
             gl: 'US',
             clientName: 'ANDROID',
-            clientVersion: '16.43.34',
+            clientVersion: '16.45.36',
             utcOffsetMinutes: 0
         },
         user: {},
         request: {}
     };
     static PLAYER_JS_URL = '';
+    static PLAYER_TOKENS: string[] | null = null;
 
     static async fetchConfig(): Promise<void> {
         try {
@@ -42,7 +44,12 @@ export class YoutubeConfig extends null {
                 json.INNERTUBE_CLIENT_NAME;
             YoutubeConfig.INNERTUBE_CONTEXT.client.clientVersion = YoutubeConfig.INNERTUBE_CLIENT_VERSION =
                 json.INNERTUBE_CLIENT_VERSION;
-            YoutubeConfig.PLAYER_JS_URL = json.PLAYER_JS_URL;
+
+            if (YoutubeConfig.PLAYER_JS_URL !== json.PLAYER_JS_URL) {
+                const { data: player } = await axios.get<string>(`${Util.getYTBaseURL()}${json.PLAYER_JS_URL}`);
+                YoutubeConfig.PLAYER_JS_URL = json.PLAYER_JS_URL;
+                YoutubeConfig.PLAYER_TOKENS = extractTokens(player);
+            }
 
             setTimeout(YoutubeConfig.fetchConfig, 120 * 60 * 1000);
         } catch {}

@@ -1,6 +1,6 @@
 {
   "name": "youtube-dlsr",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Simply used for youtube stream and search.",
   "license": "MIT",
   "author": "cjh980402 <9804cjh@naver.com> (https://github.com/cjh980402)",
@@ -25,10 +25,10 @@
     "miniget": "^4.2.1"
   },
   "devDependencies": {
-    "@types/node": "^16.11.7",
+    "@types/node": "^16.11.9",
     "gen-esm-wrapper": "^1.1.3",
     "prettier": "^2.4.1",
-    "typescript": "^4.4.4"
+    "typescript": "^4.5.2"
   },
   "keywords": [
     "download",
