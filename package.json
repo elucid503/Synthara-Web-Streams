@@ -25,10 +25,10 @@
     "miniget": "^4.2.1"
   },
   "devDependencies": {
-    "@types/node": "^16.11.9",
+    "@types/node": "^16.11.12",
     "gen-esm-wrapper": "^1.1.3",
-    "prettier": "^2.4.1",
-    "typescript": "^4.5.2"
+    "prettier": "^2.5.1",
+    "typescript": "^4.5.3"
   },
   "keywords": [
     "download",
