@@ -209,7 +209,7 @@ export class YoutubeVideo {
                 });
 
                 request.once('end', () => {
-                    if (stream.destroyed || endBytes >= (format.contentLength as number)) {
+                    if (stream.destroyed || startBytes >= (format.contentLength as number)) {
                         return;
                     }
                     endBytes = startBytes + downloadChunkSize;
