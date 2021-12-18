@@ -7,7 +7,7 @@ const listRegex = /^[A-Z]{2}[\w-]{10,}$/;
 const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts)\/)/;
 const validQueryDomains = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com'];
 
-export class Util extends null {
+export class Util {
     static getYTBaseURL(): string {
         return 'https://www.youtube.com';
     }

@@ -1,0 +1,10 @@
+{
+  "clean": true,
+  "dts": true,
+  "entry": ["src/index.ts"],
+  "format": ["cjs", "esm"],
+  "sourcemap": true,
+  "splitting": false,
+  "target": "es2020",
+  "tsconfig": "./tsconfig.json"
+}
