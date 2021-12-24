@@ -2,7 +2,7 @@ import axios from 'axios';
 import { extractTokens } from './decipher';
 import { Util } from './Util';
 
-export class YoutubeConfig {
+export class YoutubeConfig extends null {
     static INNERTUBE_API_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';
     static INNERTUBE_API_VERSION = 'v1';
     static INNERTUBE_CLIENT_NAME = 'WEB';

@@ -1,6 +1,6 @@
 {
   "name": "youtube-dlsr",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Simply used for youtube stream and search.",
   "license": "MIT",
   "author": "cjh980402 <9804cjh@naver.com> (https://github.com/cjh980402)",
@@ -27,7 +27,7 @@
   "devDependencies": {
     "@types/node": "^17.0.4",
     "prettier": "^2.5.1",
-    "tsup": "^5.11.7",
+    "tsup": "^5.11.8",
     "typescript": "^4.5.4"
   },
   "keywords": [
