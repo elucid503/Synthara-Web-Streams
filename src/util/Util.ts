@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { parse as xmlParse } from 'fast-xml-parser';
+import { XMLParser } from 'fast-xml-parser';
 import { formats } from './formats';
 import { YoutubeVideoFormat } from '../classes/YoutubeVideo';
 const videoRegex = /^[\w-]{11}$/;
@@ -82,14 +82,15 @@ export class Util extends null {
         const dashFormats: YoutubeVideoFormat[] = [];
         try {
             const { data } = await axios.get<string>(url);
-            const xml = xmlParse(data, {
+            const parser = new XMLParser({
                 attributeNamePrefix: '$',
                 ignoreAttributes: false
             });
+            const xml = parser.parse(data);
 
             for (const adaptationSet of xml.MPD.Period.AdaptationSet) {
                 for (const representation of adaptationSet.Representation) {
-                    const itag = Number(representation['$id']) as keyof typeof formats;
+                    const itag = Number(representation.$id) as keyof typeof formats;
                     const reservedFormat = formats[itag];
 
                     if (reservedFormat) {
@@ -101,10 +102,10 @@ export class Util extends null {
                             codec: reservedFormat.mimeType.split('"')[1]
                         };
 
-                        if (representation['$height']) {
-                            format.width = Number(representation['$width']);
-                            format.height = Number(representation['$height']);
-                            format.fps = Number(representation['$frameRate']);
+                        if (representation.$height) {
+                            format.width = Number(representation.$width);
+                            format.height = Number(representation.$height);
+                            format.fps = Number(representation.$frameRate);
                         }
 
                         dashFormats.push(Util.getMetadataFormat(format));
