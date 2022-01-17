@@ -6,7 +6,7 @@ export class YoutubeConfig extends null {
     static INNERTUBE_API_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';
     static INNERTUBE_API_VERSION = 'v1';
     static INNERTUBE_CLIENT_NAME = 'WEB';
-    static INNERTUBE_CLIENT_VERSION = '2.20220107.00.00';
+    static INNERTUBE_CLIENT_VERSION = '2.20220114.01.00';
     static INNERTUBE_CONTEXT = {
         client: {
             hl: 'en',
@@ -23,7 +23,7 @@ export class YoutubeConfig extends null {
             hl: 'en',
             gl: 'US',
             clientName: 'ANDROID',
-            clientVersion: '16.49.37',
+            clientVersion: '17.02.34',
             utcOffsetMinutes: 0
         },
         user: {},
