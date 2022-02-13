@@ -188,6 +188,7 @@ export class YoutubeVideo {
                             Range: `bytes=${startBytes}-${endBytes >= (format.contentLength as number) ? '' : endBytes}`
                         }
                     });
+                    nowBody = body;
                     if (statusCode === 403) {
                         // Retry download when status code is 403.
                         await abortNowBody();
@@ -196,7 +197,6 @@ export class YoutubeVideo {
                         download(this.url, options);
                         return;
                     }
-                    nowBody = body;
 
                     nowBody.once('error', (error: Error) => {
                         stream.destroy(error);
