@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { request } from 'undici';
 import { XMLParser } from 'fast-xml-parser';
 import { formats } from './formats';
 import { YoutubeVideoFormat } from '../classes/YoutubeVideo';
@@ -81,12 +81,12 @@ export class Util extends null {
     static async getDashFormats(url: string): Promise<YoutubeVideoFormat[]> {
         const dashFormats: YoutubeVideoFormat[] = [];
         try {
-            const { data } = await axios.get<string>(url);
+            const { body } = await request(url);
             const parser = new XMLParser({
                 attributeNamePrefix: '$',
                 ignoreAttributes: false
             });
-            const xml = parser.parse(data);
+            const xml = parser.parse(await body.text());
 
             for (const adaptationSet of xml.MPD.Period.AdaptationSet) {
                 for (const representation of adaptationSet.Representation) {
@@ -119,9 +119,9 @@ export class Util extends null {
     static async getHlsFormats(url: string): Promise<YoutubeVideoFormat[]> {
         const hlsFormats: YoutubeVideoFormat[] = [];
         try {
-            const { data } = await axios.get<string>(url);
+            const { body } = await request(url);
 
-            for (const line of data.split('\n')) {
+            for (const line of (await body.text()).split('\n')) {
                 if (/^https?:\/\//.test(line)) {
                     const itag = Number(/\/itag\/(\d+)\//.exec(line)?.[1]) as keyof typeof formats;
                     const reservedFormat = formats[itag];

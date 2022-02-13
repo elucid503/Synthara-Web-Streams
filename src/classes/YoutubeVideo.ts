@@ -1,6 +1,6 @@
-import miniget from 'miniget';
 import m3u8stream from 'm3u8stream';
-import { PassThrough } from 'node:stream';
+import { request } from 'undici';
+import { PassThrough, Readable } from 'node:stream';
 import { download } from '../functions/download';
 import { YoutubeConfig } from '../util/config';
 import { decipher } from '../util/decipher';
@@ -163,58 +163,65 @@ export class YoutubeVideo {
 
             let awaitDrain: (() => void) | null;
 
-            let request: miniget.Stream | null;
+            let nowBody: Readable | null;
 
             stream.on('drain', () => {
                 awaitDrain?.();
                 awaitDrain = null;
             });
 
-            stream.once('close', () => {
-                request?.destroy();
-                request?.removeAllListeners();
-                request = null;
+            stream.once('close', async () => {
+                try {
+                    // Have to use await to catch RequestAbortedError.
+                    await nowBody?.destroy();
+                } catch {}
+                nowBody?.removeAllListeners();
+                nowBody = null;
             });
 
-            const getNextChunk = () => {
-                request = miniget(format.url as string, {
-                    headers: {
-                        Range: `bytes=${startBytes}-${endBytes >= (format.contentLength as number) ? '' : endBytes}`
-                    }
-                });
-
-                request.once('error', (error: Error) => {
-                    request?.destroy();
-                    if (error.message === 'Status code: 403') {
-                        // Retry download when error code is 403.
-                        request?.removeAllListeners();
-                        request = null;
+            const getNextChunk = async () => {
+                try {
+                    const { statusCode, body } = await request(format.url as string, {
+                        headers: {
+                            Range: `bytes=${startBytes}-${endBytes >= (format.contentLength as number) ? '' : endBytes}`
+                        }
+                    });
+                    if (statusCode === 403) {
+                        // Retry download when status code is 403.
+                        nowBody?.removeAllListeners();
+                        nowBody = null;
                         options.resource = stream;
                         options.start = startBytes;
                         download(this.url, options);
-                    } else {
+                        return;
+                    }
+                    nowBody = body;
+
+                    nowBody.once('error', (error: Error) => {
                         stream.destroy(error);
-                    }
-                });
+                    });
 
-                request.on('data', (chunk: Buffer) => {
-                    if (stream.destroyed) {
-                        return;
-                    }
-                    startBytes += chunk.length;
-                    if (!stream.write(chunk)) {
-                        request?.pause();
-                        awaitDrain = () => request?.resume();
-                    }
-                });
+                    nowBody.on('data', (chunk: Buffer) => {
+                        if (stream.destroyed) {
+                            return;
+                        }
+                        startBytes += chunk.length;
+                        if (!stream.write(chunk)) {
+                            nowBody?.pause();
+                            awaitDrain = () => nowBody?.resume();
+                        }
+                    });
 
-                request.once('end', () => {
-                    if (stream.destroyed || startBytes >= (format.contentLength as number)) {
-                        return;
-                    }
-                    endBytes = startBytes + downloadChunkSize;
-                    getNextChunk();
-                });
+                    nowBody.once('end', () => {
+                        if (stream.destroyed || startBytes >= (format.contentLength as number)) {
+                            return;
+                        }
+                        endBytes = startBytes + downloadChunkSize;
+                        getNextChunk();
+                    });
+                } catch (error) {
+                    stream.destroy(error as Error);
+                }
             };
 
             getNextChunk();

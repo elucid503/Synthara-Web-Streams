@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { request } from 'undici';
 import { YoutubeListVideoInfo } from './YoutubeCompactInfo';
 import { YoutubeConfig } from '../util/config';
 import { ErrorCodes } from '../util/constants';
@@ -33,13 +33,14 @@ export class YoutubePlaylist {
         }
 
         if (this.isMix) {
-            const { data: json } = await axios.post<any>(
-                `${Util.getYTApiBaseURL()}/next?key=${YoutubeConfig.INNERTUBE_API_KEY}`,
-                {
+            const { body } = await request(`${Util.getYTApiBaseURL()}/next?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
+                method: 'POST',
+                body: JSON.stringify({
                     context: YoutubeConfig.INNERTUBE_CONTEXT,
                     playlistId: this.listId
-                }
-            );
+                })
+            });
+            const json = await body.json();
 
             const { playlist } = json.contents.twoColumnWatchNextResults.playlist;
 
@@ -47,13 +48,14 @@ export class YoutubePlaylist {
 
             this.addTracks(playlist.contents);
         } else {
-            const { data: json } = await axios.post<any>(
-                `${Util.getYTApiBaseURL()}/browse?key=${YoutubeConfig.INNERTUBE_API_KEY}`,
-                {
+            const { body } = await request(`${Util.getYTApiBaseURL()}/browse?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
+                method: 'POST',
+                body: JSON.stringify({
                     context: YoutubeConfig.INNERTUBE_CONTEXT,
                     browseId: `VL${this.listId}`
-                }
-            );
+                })
+            });
+            const json = await body.json();
 
             const metadata = json.metadata.playlistMetadataRenderer;
 
@@ -73,13 +75,14 @@ export class YoutubePlaylist {
             return;
         }
 
-        const { data: json } = await axios.post<any>(
-            `${Util.getYTApiBaseURL()}/browse?key=${YoutubeConfig.INNERTUBE_API_KEY}`,
-            {
+        const { body } = await request(`${Util.getYTApiBaseURL()}/browse?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
+            method: 'POST',
+            body: JSON.stringify({
                 context: YoutubeConfig.INNERTUBE_CONTEXT,
                 continuation: this.token
-            }
-        );
+            })
+        });
+        const json = await body.json();
 
         this.token = null;
 

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { request } from 'undici';
 import { YoutubeVideo, YoutubeVideoFormat } from '../classes/YoutubeVideo';
 import { YoutubeConfig } from '../util/config';
 import { ErrorCodes } from '../util/constants';
@@ -10,13 +10,14 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
         throw new Error(ErrorCodes.INVALID_URL);
     }
 
-    const { data: json } = await axios.post<any>(
-        `${Util.getYTApiBaseURL()}/player?key=${YoutubeConfig.INNERTUBE_API_KEY}`,
-        {
+    const { body } = await request(`${Util.getYTApiBaseURL()}/player?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
+        method: 'POST',
+        body: JSON.stringify({
             context: YoutubeConfig.INNERTUBE_ANDROID_CONTEXT,
             videoId: videoId
-        }
-    );
+        })
+    });
+    const json = await body.json();
 
     if (json.playabilityStatus?.status === 'ERROR') {
         throw new Error(json.playabilityStatus.reason);

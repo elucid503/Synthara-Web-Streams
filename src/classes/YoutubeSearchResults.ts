@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { request } from 'undici';
 import { YoutubeCompactVideoInfo, YoutubeCompactListInfo, YoutubeCompactChannelInfo } from './YoutubeCompactInfo';
 import { YoutubeConfig } from '../util/config';
 import { ErrorCodes } from '../util/constants';
@@ -40,14 +40,15 @@ export class YoutubeSearchResults {
             return;
         }
 
-        const { data: json } = await axios.post<any>(
-            `${Util.getYTApiBaseURL()}/search?key=${YoutubeConfig.INNERTUBE_API_KEY}`,
-            {
+        const { body } = await request(`${Util.getYTApiBaseURL()}/search?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
+            method: 'POST',
+            body: JSON.stringify({
                 context: YoutubeConfig.INNERTUBE_CONTEXT,
                 query: this.query,
                 params: this.type ?? ''
-            }
-        );
+            })
+        });
+        const json = await body.json();
 
         this.estimatedResults = Number(json.estimatedResults);
 
@@ -69,13 +70,14 @@ export class YoutubeSearchResults {
             return;
         }
 
-        const { data: json } = await axios.post<any>(
-            `${Util.getYTApiBaseURL()}/search?key=${YoutubeConfig.INNERTUBE_API_KEY}`,
-            {
+        const { body } = await request(`${Util.getYTApiBaseURL()}/search?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
+            method: 'POST',
+            body: JSON.stringify({
                 context: YoutubeConfig.INNERTUBE_CONTEXT,
                 continuation: this.token
-            }
-        );
+            })
+        });
+        const json = await body.json();
 
         this.token = null;
         this.estimatedResults = Number(json.estimatedResults);
