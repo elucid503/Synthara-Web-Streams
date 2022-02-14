@@ -165,21 +165,15 @@ export class YoutubeVideo {
 
             let nowBody: Readable | null;
 
-            const abortNowBody = async () => {
-                try {
-                    // Have to use await to catch RequestAbortedError.
-                    await nowBody?.destroy();
-                } catch {}
-                nowBody?.removeAllListeners();
-                nowBody = null;
-            };
-
             stream.on('drain', () => {
                 awaitDrain?.();
                 awaitDrain = null;
             });
 
-            stream.once('close', abortNowBody);
+            stream.once('close', () => {
+                nowBody?.destroy();
+                nowBody = null;
+            });
 
             const getNextChunk = async () => {
                 try {
@@ -191,7 +185,8 @@ export class YoutubeVideo {
                     nowBody = body;
                     if (statusCode === 403) {
                         // Retry download when status code is 403.
-                        await abortNowBody();
+                        nowBody?.destroy();
+                        nowBody = null;
                         options.resource = stream;
                         options.start = startBytes;
                         download(this.url, options);
