@@ -83,6 +83,7 @@ export interface DownloadOptions {
     liveBuffer?: number;
     chunkSize?: number;
     start?: number;
+    remainRetry?: number;
 }
 
 export class YoutubeVideo {
@@ -158,7 +159,8 @@ export class YoutubeVideo {
 
             const downloadChunkSize = options.chunkSize ?? 256 * 1024;
 
-            let startBytes = options.start ?? 0,
+            let remainRetry = options.remainRetry ?? 5,
+                startBytes = options.start ?? 0,
                 endBytes = startBytes + downloadChunkSize;
 
             let awaitDrain: (() => void) | null;
@@ -177,27 +179,32 @@ export class YoutubeVideo {
 
             const getNextChunk = async () => {
                 try {
-                    const { statusCode, body } = await request(format.url as string, {
+                    const { statusCode, headers, body } = await request(format.url as string, {
                         headers: {
                             Range: `bytes=${startBytes}-${endBytes >= (format.contentLength as number) ? '' : endBytes}`
                         }
                     });
-                    nowBody = body;
-                    if (statusCode === 403) {
-                        // Retry download when status code is 403.
-                        nowBody?.destroy();
-                        nowBody = null;
-                        options.resource = stream;
-                        options.start = startBytes;
-                        download(this.url, options);
+                    nowBody = body.once('error', (error: Error) => {
+                        if (error.message !== 'Request aborted') {
+                            stream.destroy(error);
+                        }
+                    });
+                    if (statusCode === 403 || headers['content-length'] === '0') {
+                        // Retry download when status code is 403 or content length is 0.
+                        if (remainRetry > 0) {
+                            body.destroy();
+                            nowBody = null;
+                            options.resource = stream;
+                            options.start = startBytes;
+                            options.remainRetry = remainRetry - 1;
+                            download(this.url, options);
+                        } else {
+                            stream.destroy(new Error('Too many retry download'));
+                        }
                         return;
                     }
 
-                    nowBody.once('error', (error: Error) => {
-                        stream.destroy(error);
-                    });
-
-                    nowBody.on('data', (chunk: Buffer) => {
+                    body.on('data', (chunk: Buffer) => {
                         if (stream.destroyed) {
                             return;
                         }
@@ -208,7 +215,7 @@ export class YoutubeVideo {
                         }
                     });
 
-                    nowBody.once('end', () => {
+                    body.once('end', () => {
                         if (stream.destroyed || startBytes >= (format.contentLength as number)) {
                             return;
                         }
