@@ -1,5 +1,5 @@
 import m3u8stream from 'm3u8stream';
-import { request } from 'undici';
+import { errors, request } from 'undici';
 import { PassThrough, Readable } from 'node:stream';
 import { download } from '../functions/download';
 import { YoutubeConfig } from '../util/config';
@@ -189,11 +189,11 @@ export class YoutubeVideo {
                         }
                     });
                     nowBody = body.once('error', (error: Error) => {
-                        if (error.message !== 'Request aborted') {
+                        if (!(error instanceof errors.RequestAbortedError)) {
                             stream.destroy(error);
                         }
                     });
-                    if (statusCode === 403 || (statusCode === 302 && headers.location)) {
+                    if (statusCode === 403 || statusCode === 302) {
                         // Retry download when status code is 403 or 302.
                         if (remainRetry > 0) {
                             body.destroy();
