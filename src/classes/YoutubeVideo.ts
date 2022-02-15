@@ -159,13 +159,15 @@ export class YoutubeVideo {
 
             const downloadChunkSize = options.chunkSize ?? 256 * 1024;
 
-            let remainRetry = options.remainRetry ?? 5,
+            let remainRetry = options.remainRetry ?? 10,
                 startBytes = options.start ?? 0,
                 endBytes = startBytes + downloadChunkSize;
 
-            let awaitDrain: (() => void) | null;
+            let awaitDrain: (() => void) | null = null;
 
-            let nowBody: Readable | null;
+            let nowBody: Readable | null = null;
+
+            let retryTimer: NodeJS.Timer | null = null;
 
             stream.on('drain', () => {
                 awaitDrain?.();
@@ -175,6 +177,8 @@ export class YoutubeVideo {
             stream.once('close', () => {
                 nowBody?.destroy();
                 nowBody = null;
+                clearTimeout(retryTimer as NodeJS.Timer);
+                retryTimer = null;
             });
 
             const getNextChunk = async () => {
@@ -189,15 +193,21 @@ export class YoutubeVideo {
                             stream.destroy(error);
                         }
                     });
-                    if (statusCode === 403 || headers['content-length'] === '0') {
-                        // Retry download when status code is 403 or content length is 0.
+                    if (statusCode === 403 || (statusCode === 302 && headers.location)) {
+                        // Retry download when status code is 403 or 302.
                         if (remainRetry > 0) {
                             body.destroy();
                             nowBody = null;
-                            options.resource = stream;
-                            options.start = startBytes;
-                            options.remainRetry = remainRetry - 1;
-                            download(this.url, options);
+                            remainRetry--;
+                            if (statusCode === 403) {
+                                options.resource = stream;
+                                options.start = startBytes;
+                                options.remainRetry = remainRetry;
+                                retryTimer = setTimeout(download, 150, this.url, options);
+                            } else {
+                                format.url = headers.location; // Redirect location.
+                                retryTimer = setTimeout(getNextChunk, 150);
+                            }
                         } else {
                             stream.destroy(new Error('Too many retry download'));
                         }
