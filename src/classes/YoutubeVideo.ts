@@ -151,12 +151,6 @@ export class YoutubeVideo {
 
             return stream;
         } else {
-            const stream =
-                options.resource ??
-                new PassThrough({
-                    highWaterMark: options.highWaterMark ?? 64 * 1024
-                });
-
             const downloadChunkSize = options.chunkSize ?? 256 * 1024;
 
             let remainRetry = options.remainRetry ?? 10,
@@ -169,23 +163,27 @@ export class YoutubeVideo {
 
             let retryTimer: NodeJS.Timer | null = null;
 
-            stream.on('drain', () => {
-                awaitDrain?.();
-                awaitDrain = null;
-            });
+            const stream =
+                options.resource ??
+                new PassThrough({
+                    highWaterMark: options.highWaterMark ?? 64 * 1024
+                })
+                    .on('drain', () => {
+                        awaitDrain?.();
+                        awaitDrain = null;
+                    })
+                    .once('close', () => {
+                        nowBody?.destroy();
+                        nowBody = null;
+                        clearTimeout(retryTimer as NodeJS.Timer);
+                        retryTimer = null;
+                    });
 
-            stream.once('close', () => {
-                nowBody?.destroy();
-                nowBody = null;
-                clearTimeout(retryTimer as NodeJS.Timer);
-                retryTimer = null;
-            });
-
-            const getNextChunk = async () => {
+            const getRangeChunk = async () => {
                 try {
                     const { statusCode, headers, body } = await request(format.url as string, {
                         headers: {
-                            Range: `bytes=${startBytes}-${endBytes >= (format.contentLength as number) ? '' : endBytes}`
+                            range: `bytes=${startBytes}-${endBytes >= (format.contentLength as number) ? '' : endBytes}`
                         }
                     });
                     nowBody = body.once('error', (error: Error) => {
@@ -193,6 +191,7 @@ export class YoutubeVideo {
                             stream.destroy(error);
                         }
                     });
+
                     if (statusCode === 403 || statusCode === 302) {
                         // Retry download when status code is 403 or 302.
                         if (remainRetry > 0) {
@@ -206,7 +205,7 @@ export class YoutubeVideo {
                                 retryTimer = setTimeout(download, 150, this.url, options);
                             } else {
                                 format.url = headers.location; // Redirect location.
-                                retryTimer = setTimeout(getNextChunk, 150);
+                                retryTimer = setTimeout(getRangeChunk, 150);
                             }
                         } else {
                             stream.destroy(new Error('Too many retry download'));
@@ -223,21 +222,19 @@ export class YoutubeVideo {
                             nowBody?.pause();
                             awaitDrain = () => nowBody?.resume();
                         }
-                    });
-
-                    body.once('end', () => {
+                    }).once('end', () => {
                         if (stream.destroyed || startBytes >= (format.contentLength as number)) {
                             return;
                         }
                         endBytes = startBytes + downloadChunkSize;
-                        getNextChunk();
+                        getRangeChunk();
                     });
                 } catch (error) {
                     stream.destroy(error as Error);
                 }
             };
 
-            getNextChunk();
+            getRangeChunk();
 
             return stream;
         }
