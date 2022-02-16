@@ -192,9 +192,9 @@ export class YoutubeVideo {
                         }
                     });
 
-                    if (statusCode === 403 || statusCode === 302) {
-                        // Retry download when status code is 403 or 302.
-                        if (remainRetry > 0) {
+                    if (statusCode !== 206) {
+                        if ((statusCode === 403 || statusCode === 302) && remainRetry > 0) {
+                            // Retry download when status code is 403 or 302.
                             body.destroy();
                             nowBody = null;
                             remainRetry--;
@@ -208,7 +208,7 @@ export class YoutubeVideo {
                                 retryTimer = setTimeout(getRangeChunk, 150);
                             }
                         } else {
-                            stream.destroy(new Error('Too many retry download'));
+                            stream.destroy(new Error(`Cannot retry download with status code ${statusCode}`));
                         }
                         return;
                     }
