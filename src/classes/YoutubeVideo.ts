@@ -212,6 +212,8 @@ export class YoutubeVideo {
                         }
                         return;
                     }
+                    // Reset remainRetry when request is success.
+                    remainRetry = options.remainRetry ?? 10;
 
                     body.on('data', (chunk: Buffer) => {
                         if (stream.destroyed) {

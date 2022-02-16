@@ -8,7 +8,7 @@ const SearchType = {
     all: ''
 } as const;
 
-export interface SearchOption {
+export interface SearchOptions {
     type?: keyof typeof SearchType;
     limit?: number;
 }
@@ -20,7 +20,7 @@ export interface SearchOption {
  */
 export async function search(
     query: string,
-    { type = 'all', limit = 10 }: SearchOption = {}
+    { type = 'all', limit = 10 }: SearchOptions = {}
 ): Promise<YoutubeSearchInfo[]> {
     const { results } = await getSearchInfo(query, limit, SearchType[type]);
 
