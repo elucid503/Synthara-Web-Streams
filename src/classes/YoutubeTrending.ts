@@ -35,7 +35,7 @@ export class YoutubeTrending {
                     duration:
                         video.lengthText.simpleText
                             .split(':')
-                            .map((v: string) => Number(v))
+                            .map(Number)
                             .reduce((acc: number, time: number) => 60 * acc + time) * 1000,
                     durationText: video.lengthText.simpleText,
                     viewCount: Number(video.viewCountText.simpleText.replace(/\D/g, '')),

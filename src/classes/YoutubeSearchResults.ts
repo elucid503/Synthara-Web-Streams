@@ -122,7 +122,7 @@ export class YoutubeSearchResults {
                     duration:
                         durationText
                             .split(':')
-                            .map((v: string) => Number(v))
+                            .map(Number)
                             .reduce((acc: number, time: number) => 60 * acc + time) * 1000,
                     durationText: durationText,
                     viewCount: Number(rawViewCount.replace(/\D/g, '')),

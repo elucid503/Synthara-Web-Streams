@@ -109,7 +109,7 @@ export class YoutubePlaylist {
                         duration:
                             durationText
                                 .split(':')
-                                .map((v: string) => Number(v))
+                                .map(Number)
                                 .reduce((acc: number, time: number) => 60 * acc + time) * 1000,
                         durationText: durationText,
                         isPlayable: true
