@@ -1,13 +1,13 @@
 import { request } from 'undici';
+import { YoutubeError, UrlError } from '../classes/Errors';
 import { YoutubeVideo, YoutubeVideoFormat } from '../classes/YoutubeVideo';
 import { YoutubeConfig } from '../util/config';
-import { ErrorCodes } from '../util/constants';
 import { Util } from '../util/Util';
 
 export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = false): Promise<YoutubeVideo> {
     const videoId = Util.getVideoId(urlOrId);
     if (!videoId) {
-        throw new Error(ErrorCodes.INVALID_URL);
+        throw new UrlError();
     }
 
     const { body } = await request(`${Util.getYTApiBaseURL()}/player?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
@@ -20,7 +20,7 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
     const json = await body.json();
 
     if (json.playabilityStatus?.status === 'ERROR') {
-        throw new Error(json.playabilityStatus.reason);
+        throw new YoutubeError(json.playabilityStatus.reason);
     }
 
     const video = new YoutubeVideo(json);

@@ -1,3 +1,4 @@
+export * from './Errors';
 export * from './YoutubeChannel';
 export * from './YoutubeCompactInfo';
 export * from './YoutubePlaylist';

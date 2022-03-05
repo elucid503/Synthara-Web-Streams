@@ -1,11 +1,11 @@
+import { UrlError } from '../classes/Errors';
 import { YoutubePlaylist } from '../classes/YoutubePlaylist';
-import { ErrorCodes } from '../util/constants';
 import { Util } from '../util/Util';
 
 export async function getPlaylistInfo(urlOrId: string, getAllVideos: boolean = false): Promise<YoutubePlaylist> {
     const listId = Util.getListId(urlOrId);
     if (!listId) {
-        throw new Error(ErrorCodes.INVALID_URL);
+        throw new UrlError();
     }
 
     const playlist = new YoutubePlaylist(listId);

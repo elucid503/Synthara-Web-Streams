@@ -1,7 +1,7 @@
 import { request } from 'undici';
+import { TokenError } from './Errors';
 import { YoutubeListVideoInfo } from './YoutubeCompactInfo';
 import { YoutubeConfig } from '../util/config';
-import { ErrorCodes } from '../util/constants';
 import { Util } from '../util/Util';
 
 export class YoutubePlaylist {
@@ -134,7 +134,7 @@ export class YoutubePlaylist {
                 } else if (renderer) {
                     this.token = renderer.continuationEndpoint.continuationCommand.token;
                     if (!this.token) {
-                        throw new Error(ErrorCodes.INVALID_TOKEN);
+                        throw new TokenError();
                     }
                 }
             }

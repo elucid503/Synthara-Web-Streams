@@ -1,7 +1,7 @@
 import { request } from 'undici';
+import { TokenError } from './Errors';
 import { YoutubeCompactVideoInfo, YoutubeCompactListInfo, YoutubeCompactChannelInfo } from './YoutubeCompactInfo';
 import { YoutubeConfig } from '../util/config';
-import { ErrorCodes } from '../util/constants';
 import { Util } from '../util/Util';
 
 export type YoutubeSearchInfo = YoutubeCompactVideoInfo | YoutubeCompactListInfo | YoutubeCompactChannelInfo;
@@ -59,7 +59,7 @@ export class YoutubeSearchResults {
             } else if (section.continuationItemRenderer) {
                 this.token = section.continuationItemRenderer.continuationEndpoint.continuationCommand.token;
                 if (!this.token) {
-                    throw new Error(ErrorCodes.INVALID_TOKEN);
+                    throw new TokenError();
                 }
             }
         }
@@ -88,7 +88,7 @@ export class YoutubeSearchResults {
             } else if (section.continuationItemRenderer) {
                 this.token = section.continuationItemRenderer.continuationEndpoint.continuationCommand.token;
                 if (!this.token) {
-                    throw new Error(ErrorCodes.INVALID_TOKEN);
+                    throw new TokenError();
                 }
             }
         }

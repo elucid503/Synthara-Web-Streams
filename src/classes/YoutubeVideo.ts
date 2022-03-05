@@ -62,7 +62,7 @@ export interface YoutubeVideoFormat {
     approxDurationMs?: number;
     signatureCipher?: string;
 
-    // Provided by formats getter.
+    // Provided by addFormats().
     url?: string;
 
     // Provided by itag format.

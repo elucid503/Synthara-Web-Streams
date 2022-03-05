@@ -30,7 +30,7 @@ export function decipher(tokens: string[], sig: string): string {
     let arr = sig.split('');
 
     for (const token of tokens) {
-        const position = ~~token.slice(1);
+        const position = Number(token.slice(1));
 
         switch (token[0]) {
             case 'r':
