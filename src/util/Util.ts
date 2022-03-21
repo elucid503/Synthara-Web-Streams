@@ -1,5 +1,6 @@
 import { request } from 'undici';
 import { XMLParser } from 'fast-xml-parser';
+import { YoutubeConfig } from './config';
 import { formats } from './formats';
 import { YoutubeVideoFormat } from '../classes/YoutubeVideo';
 const videoRegex = /^[\w-]{11}$/;
@@ -8,32 +9,37 @@ const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|
 const validQueryDomains = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com'];
 
 export class Util extends null {
-    static getYTBaseURL(): string {
+    static getHomeURL(): string {
         return 'https://www.youtube.com';
     }
 
-    static getYTSearchURL(): string {
-        return 'https://www.youtube.com/results';
-    }
-
-    static getYTVideoURL(): string {
-        return 'https://www.youtube.com/watch?v=';
-    }
-
-    static getYTChannelURL(): string {
-        return 'https://www.youtube.com/channel';
-    }
-
-    static getYTTrendingURL(): string {
+    static getTrendingURL(): string {
         return 'https://www.youtube.com/feed/trending';
     }
 
-    static getYTPlaylistURL(): string {
-        return 'https://www.youtube.com/playlist';
+    static getSearchURL(query: string, type?: string): string {
+        const url = new URL('https://www.youtube.com/results');
+        url.searchParams.set('search_query', query);
+        if (type) {
+            url.searchParams.set('sp', type);
+        }
+        return url.toString();
     }
 
-    static getYTApiBaseURL(): string {
-        return 'https://www.youtube.com/youtubei/v1';
+    static getVideoURL(id: string): string {
+        return `https://www.youtube.com/watch?v=${id}`;
+    }
+
+    static getChannelURL(id: string): string {
+        return `https://www.youtube.com/channel/${id}`;
+    }
+
+    static getPlaylistURL(id: string): string {
+        return `https://www.youtube.com/playlist?list=${id}`;
+    }
+
+    static getApiURL(param: string): string {
+        return `https://www.youtube.com/youtubei/v1/${param}?key=${YoutubeConfig.INNERTUBE_API_KEY}`;
     }
 
     static getVideoId(urlOrId: string, checkUrl: boolean = false): string | null {

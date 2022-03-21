@@ -4,7 +4,7 @@ import { YoutubeConfig } from '../util/config';
 import { Util } from '../util/Util';
 
 export async function getTrendingInfo(): Promise<YoutubeTrending> {
-    const { body } = await request(`${Util.getYTApiBaseURL()}/browse?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
+    const { body } = await request(Util.getApiURL('browse'), {
         method: 'POST',
         body: JSON.stringify({
             context: YoutubeConfig.INNERTUBE_CONTEXT,

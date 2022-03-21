@@ -20,7 +20,7 @@ export class YoutubePlaylist {
     }
 
     get url(): string {
-        return `${Util.getYTPlaylistURL()}?list=${this.listId}`;
+        return Util.getPlaylistURL(this.listId);
     }
 
     allLoaded(): boolean {
@@ -33,7 +33,7 @@ export class YoutubePlaylist {
         }
 
         if (this.isMix) {
-            const { body } = await request(`${Util.getYTApiBaseURL()}/next?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
+            const { body } = await request(Util.getApiURL('next'), {
                 method: 'POST',
                 body: JSON.stringify({
                     context: YoutubeConfig.INNERTUBE_CONTEXT,
@@ -48,7 +48,7 @@ export class YoutubePlaylist {
 
             this.addTracks(playlist.contents);
         } else {
-            const { body } = await request(`${Util.getYTApiBaseURL()}/browse?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
+            const { body } = await request(Util.getApiURL('browse'), {
                 method: 'POST',
                 body: JSON.stringify({
                     context: YoutubeConfig.INNERTUBE_CONTEXT,
@@ -75,7 +75,7 @@ export class YoutubePlaylist {
             return;
         }
 
-        const { body } = await request(`${Util.getYTApiBaseURL()}/browse?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
+        const { body } = await request(Util.getApiURL('browse'), {
             method: 'POST',
             body: JSON.stringify({
                 context: YoutubeConfig.INNERTUBE_CONTEXT,
@@ -102,7 +102,7 @@ export class YoutubePlaylist {
                     this.tracks.push({
                         type: 'video',
                         id: track.videoId,
-                        url: `${Util.getYTVideoURL()}${track.videoId}`,
+                        url: Util.getVideoURL(track.videoId),
                         title: track.title?.simpleText,
                         thumbnails: track.thumbnail?.thumbnails ?? [],
                         index: track.navigationEndpoint.watchEndpoint.index + 1,
@@ -123,7 +123,7 @@ export class YoutubePlaylist {
                     this.tracks.push({
                         type: 'video',
                         id: track.videoId,
-                        url: `${Util.getYTVideoURL()}${track.videoId}`,
+                        url: Util.getVideoURL(track.videoId),
                         title: track.title?.runs?.[0].text,
                         thumbnails: track.thumbnail?.thumbnails ?? [],
                         index: Number(track.index?.simpleText ?? '0'),

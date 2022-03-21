@@ -100,13 +100,13 @@ export class YoutubeVideo {
     }
 
     get url(): string {
-        return `${Util.getYTVideoURL()}${this.json.videoDetails.videoId}`;
+        return Util.getVideoURL(this.json.videoDetails.videoId);
     }
 
     get details(): YoutubeVideoDetails {
         return {
             id: this.json.videoDetails.videoId,
-            url: `${Util.getYTVideoURL()}${this.json.videoDetails.videoId}`,
+            url: Util.getVideoURL(this.json.videoDetails.videoId),
             title: this.json.videoDetails.title,
             thumbnails: this.json.videoDetails.thumbnail.thumbnails,
             description: this.json.videoDetails.shortDescription,

@@ -10,7 +10,7 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
         throw new UrlError();
     }
 
-    const { body } = await request(`${Util.getYTApiBaseURL()}/player?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
+    const { body } = await request(Util.getApiURL('player'), {
         method: 'POST',
         body: JSON.stringify({
             context: YoutubeConfig.INNERTUBE_ANDROID_CONTEXT,

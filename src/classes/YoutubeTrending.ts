@@ -16,7 +16,7 @@ export class YoutubeTrending {
     }
 
     get url(): string {
-        return Util.getYTTrendingURL();
+        return Util.getTrendingURL();
     }
 
     private addTrends(trends: any[]): void {
@@ -27,7 +27,7 @@ export class YoutubeTrending {
                 this.trends.push({
                     type: 'video',
                     id: video.videoId,
-                    url: `${Util.getYTVideoURL()}${video.videoId}`,
+                    url: Util.getVideoURL(video.videoId),
                     title: video.title.runs[0].text,
                     thumbnails: video.thumbnail.thumbnails,
                     publishedTimeAgo: video.publishedTimeText?.simpleText,
@@ -42,9 +42,7 @@ export class YoutubeTrending {
                     viewCountText: video.shortViewCountText.simpleText,
                     channel: {
                         id: video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId,
-                        url: `${Util.getYTChannelURL()}/${
-                            video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId
-                        }`,
+                        url: Util.getChannelURL(video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId),
                         title: video.ownerText.runs[0].text,
                         thumbnails:
                             video.channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.thumbnail

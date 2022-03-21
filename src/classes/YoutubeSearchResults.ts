@@ -23,12 +23,7 @@ export class YoutubeSearchResults {
     }
 
     get url(): string {
-        const url = new URL(Util.getYTSearchURL());
-        url.searchParams.set('search_query', this.query);
-        if (this.type) {
-            url.searchParams.set('sp', this.type);
-        }
-        return url.toString();
+        return Util.getSearchURL(this.query, this.type);
     }
 
     allLoaded(): boolean {
@@ -40,7 +35,7 @@ export class YoutubeSearchResults {
             return;
         }
 
-        const { body } = await request(`${Util.getYTApiBaseURL()}/search?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
+        const { body } = await request(Util.getApiURL('search'), {
             method: 'POST',
             body: JSON.stringify({
                 context: YoutubeConfig.INNERTUBE_CONTEXT,
@@ -70,7 +65,7 @@ export class YoutubeSearchResults {
             return;
         }
 
-        const { body } = await request(`${Util.getYTApiBaseURL()}/search?key=${YoutubeConfig.INNERTUBE_API_KEY}`, {
+        const { body } = await request(Util.getApiURL('search'), {
             method: 'POST',
             body: JSON.stringify({
                 context: YoutubeConfig.INNERTUBE_CONTEXT,
@@ -114,7 +109,7 @@ export class YoutubeSearchResults {
                 this.results.push({
                     type: 'video',
                     id: video.videoId,
-                    url: `${Util.getYTVideoURL()}${video.videoId}`,
+                    url: Util.getVideoURL(video.videoId),
                     title: video.title.runs[0].text,
                     thumbnails: video.thumbnail.thumbnails,
                     publishedTimeAgo: video.publishedTimeText?.simpleText,
@@ -129,9 +124,7 @@ export class YoutubeSearchResults {
                     viewCountText: viewCountText,
                     channel: {
                         id: video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId,
-                        url: `${Util.getYTChannelURL()}/${
-                            video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId
-                        }`,
+                        url: Util.getChannelURL(video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId),
                         title: video.ownerText.runs[0].text,
                         thumbnails:
                             video.channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.thumbnail
@@ -142,15 +135,15 @@ export class YoutubeSearchResults {
                 this.results.push({
                     type: 'playlist',
                     id: list.playlistId,
-                    url: `${Util.getYTPlaylistURL()}?list=${list.playlistId}`,
+                    url: Util.getPlaylistURL(list.playlistId),
                     title: list.title.simpleText,
                     thumbnails: list.thumbnails,
                     videoCount: Number(list.videoCount.replace(/\D/g, '')),
                     channel: {
                         id: list.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId,
-                        url: `${Util.getYTChannelURL()}/${
+                        url: Util.getChannelURL(
                             list.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId
-                        }`,
+                        ),
                         title: list.shortBylineText.runs[0].text
                     }
                 });
@@ -160,7 +153,7 @@ export class YoutubeSearchResults {
                 this.results.push({
                     type: 'channel',
                     id: channel.channelId,
-                    url: `${Util.getYTChannelURL()}/${channel.channelId}`,
+                    url: Util.getChannelURL(channel.channelId),
                     title: channel.title.simpleText,
                     thumbnails: channel.thumbnail.thumbnails,
                     verified: Boolean(channel.ownerBadges?.[0]?.metadataBadgeRenderer?.style?.includes('VERIFIED')),

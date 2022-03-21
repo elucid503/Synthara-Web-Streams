@@ -34,7 +34,7 @@ export class YoutubeConfig extends null {
 
     static async fetchConfig(): Promise<void> {
         try {
-            const { body } = await request(`${Util.getYTBaseURL()}?hl=en`);
+            const { body } = await request(`${Util.getHomeURL()}?hl=en`);
 
             const json = JSON.parse((/ytcfg.set\(({.+?})\)/s.exec(await body.text()) as RegExpExecArray)[1]);
 
@@ -46,7 +46,7 @@ export class YoutubeConfig extends null {
                 json.INNERTUBE_CLIENT_VERSION;
 
             if (YoutubeConfig.PLAYER_JS_URL !== json.PLAYER_JS_URL) {
-                const { body: player } = await request(`${Util.getYTBaseURL()}${json.PLAYER_JS_URL}`);
+                const { body: player } = await request(`${Util.getHomeURL()}${json.PLAYER_JS_URL}`);
                 YoutubeConfig.PLAYER_JS_URL = json.PLAYER_JS_URL;
                 YoutubeConfig.PLAYER_TOKENS = extractTokens(await player.text());
             }

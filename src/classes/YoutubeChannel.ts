@@ -30,7 +30,7 @@ export class YoutubeChannel {
     }
 
     get url(): string {
-        return `${Util.getYTChannelURL()}/${this.json.header.c4TabbedHeaderRenderer.channelId}`;
+        return Util.getChannelURL(this.json.header.c4TabbedHeaderRenderer.channelId);
     }
 
     get details(): YoutubeChannelDetails {
@@ -39,7 +39,7 @@ export class YoutubeChannel {
 
         return {
             id: header.channelId,
-            url: `${Util.getYTChannelURL()}/${header.channelId}`,
+            url: Util.getChannelURL(header.channelId),
             title: header.title,
             avatars: header.avatar.thumbnails,
             banners: header.banner.thumbnails,
