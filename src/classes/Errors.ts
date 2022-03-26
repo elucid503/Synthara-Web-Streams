@@ -11,7 +11,7 @@ export class TokenError extends Error {
     code = 'INVALID_TOKEN';
     constructor(message?: string) {
         super(message);
-        this.message ||= 'An invalid token was found.';
+        this.message ||= 'An invalid token is found.';
     }
 }
 
@@ -29,6 +29,6 @@ export class FormatError extends Error {
     code = 'NO_SUITABLE_FORMAT';
     constructor(message?: string) {
         super(message);
-        this.message ||= 'Could not find suitable format for this download.';
+        this.message ||= 'Cannot find suitable format for this download.';
     }
 }
