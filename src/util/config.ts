@@ -1,19 +1,17 @@
 import { request } from 'undici';
 import { extractTokens } from './decipher';
-import { Util } from './Util';
 
 export class YoutubeConfig extends null {
     static INNERTUBE_API_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';
     static INNERTUBE_API_VERSION = 'v1';
     static INNERTUBE_CLIENT_NAME = 'WEB';
-    static INNERTUBE_CLIENT_VERSION = '2.20220318.00.00';
+    static INNERTUBE_CLIENT_VERSION = '2.20220325.00.00';
     static INNERTUBE_CONTEXT = {
         client: {
             hl: 'en',
             gl: 'US',
             clientName: 'WEB',
-            clientVersion: '2.20220318.00.00',
-            utcOffsetMinutes: 0
+            clientVersion: '2.20220325.00.00'
         },
         user: {},
         request: {}
@@ -23,8 +21,7 @@ export class YoutubeConfig extends null {
             hl: 'en',
             gl: 'US',
             clientName: 'ANDROID',
-            clientVersion: '17.09.33',
-            utcOffsetMinutes: 0
+            clientVersion: '17.11.34'
         },
         user: {},
         request: {}
@@ -34,9 +31,9 @@ export class YoutubeConfig extends null {
 
     static async fetchConfig(): Promise<void> {
         try {
-            const { body } = await request(`${Util.getHomeURL()}?hl=en`);
+            const { body } = await request('https://www.youtube.com/?hl=en');
 
-            const json = JSON.parse((/ytcfg.set\(({.+?})\)/s.exec(await body.text()) as RegExpExecArray)[1]);
+            const json = JSON.parse((/ytcfg.set\(({.+?})\);/s.exec(await body.text()) as RegExpExecArray)[1]);
 
             YoutubeConfig.INNERTUBE_API_KEY = json.INNERTUBE_API_KEY;
             YoutubeConfig.INNERTUBE_API_VERSION = json.INNERTUBE_API_VERSION;
@@ -46,7 +43,7 @@ export class YoutubeConfig extends null {
                 json.INNERTUBE_CLIENT_VERSION;
 
             if (YoutubeConfig.PLAYER_JS_URL !== json.PLAYER_JS_URL) {
-                const { body: player } = await request(`${Util.getHomeURL()}${json.PLAYER_JS_URL}`);
+                const { body: player } = await request(`https://www.youtube.com${json.PLAYER_JS_URL}`);
                 YoutubeConfig.PLAYER_JS_URL = json.PLAYER_JS_URL;
                 YoutubeConfig.PLAYER_TOKENS = extractTokens(await player.text());
             }
