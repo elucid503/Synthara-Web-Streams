@@ -187,7 +187,11 @@ export class YoutubeVideo {
                         }
                     });
                     nowBody = body.once('error', (error: Error) => {
-                        if (!(error instanceof errors.RequestAbortedError)) {
+                        if (error instanceof errors.SocketError) {
+                            nowBody?.destroy();
+                            nowBody = null;
+                            retryTimer = setTimeout(getRangeChunk, 150);
+                        } else if (!(error instanceof errors.RequestAbortedError)) {
                             stream.destroy(error);
                         }
                     });
