@@ -151,10 +151,10 @@ export class YoutubeVideo {
 
             return stream;
         } else {
-            const downloadChunkSize = options.chunkSize ?? 256 * 1024;
+            const downloadChunkSize = options.chunkSize ?? 256 * 1024,
+                remainRetry = options.remainRetry ?? 10;
 
-            let remainRetry = options.remainRetry ?? 10,
-                startBytes = options.start ?? 0,
+            let startBytes = options.start ?? 0,
                 endBytes = startBytes + downloadChunkSize;
 
             let awaitDrain: (() => void) | null = null;
@@ -203,10 +203,9 @@ export class YoutubeVideo {
                             // Retry download when status code is 403.
                             body.destroy();
                             nowBody = null;
-                            remainRetry--;
                             options.resource = stream;
                             options.start = startBytes;
-                            options.remainRetry = remainRetry;
+                            options.remainRetry = remainRetry - 1;
                             retryTimer = setTimeout(download, 150, this.url, options);
                         } else {
                             stream.destroy(new Error(`Cannot retry download with status code ${statusCode}`));
