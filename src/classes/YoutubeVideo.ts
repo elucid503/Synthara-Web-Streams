@@ -181,13 +181,15 @@ export class YoutubeVideo {
 
             const getRangeChunk = async () => {
                 try {
-                    const { statusCode, headers, body } = await request(format.url as string, {
+                    const { statusCode, body } = await request(format.url as string, {
                         headers: {
                             range: `bytes=${startBytes}-${endBytes >= (format.contentLength as number) ? '' : endBytes}`
-                        }
+                        },
+                        maxRedirections: 10
                     });
                     nowBody = body.once('error', (error: Error) => {
                         if (error instanceof errors.SocketError) {
+                            // Retry getRangeChunk when error is SocketError.
                             nowBody?.destroy();
                             nowBody = null;
                             retryTimer = setTimeout(getRangeChunk, 150);
@@ -197,27 +199,20 @@ export class YoutubeVideo {
                     });
 
                     if (statusCode !== 206) {
-                        if ((statusCode === 403 || statusCode === 302) && remainRetry > 0) {
-                            // Retry download when status code is 403 or 302.
+                        if (statusCode === 403 && remainRetry > 0) {
+                            // Retry download when status code is 403.
                             body.destroy();
                             nowBody = null;
                             remainRetry--;
-                            if (statusCode === 403) {
-                                options.resource = stream;
-                                options.start = startBytes;
-                                options.remainRetry = remainRetry;
-                                retryTimer = setTimeout(download, 150, this.url, options);
-                            } else {
-                                format.url = headers.location; // Redirect location.
-                                retryTimer = setTimeout(getRangeChunk, 150);
-                            }
+                            options.resource = stream;
+                            options.start = startBytes;
+                            options.remainRetry = remainRetry;
+                            retryTimer = setTimeout(download, 150, this.url, options);
                         } else {
                             stream.destroy(new Error(`Cannot retry download with status code ${statusCode}`));
                         }
                         return;
                     }
-                    // Reset remainRetry when request is success.
-                    remainRetry = options.remainRetry ?? 10;
 
                     body.on('data', (chunk: Buffer) => {
                         if (stream.destroyed) {
