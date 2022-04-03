@@ -95,7 +95,7 @@ export class Util extends null {
             const xml = parser.parse(await body.text());
 
             for (const adaptationSet of xml.MPD.Period.AdaptationSet) {
-                for (const representation of adaptationSet.Representation) {
+                for (const representation of [adaptationSet.Representation].flat()) {
                     const itag = Number(representation.$id) as keyof typeof formats;
                     const reservedFormat = formats[itag];
 
