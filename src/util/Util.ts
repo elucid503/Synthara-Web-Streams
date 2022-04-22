@@ -75,12 +75,11 @@ export class Util extends null {
     }
 
     static getMetadataFormat(format: YoutubeVideoFormat): YoutubeVideoFormat {
-        format = { ...formats[format.itag as keyof typeof formats], ...format };
         format.hasVideo = Boolean(format.qualityLabel);
         format.hasAudio = Boolean(format.audioBitrate);
-        format.isLive = /\bsource[/=]yt_(live|premiere)_broadcast\b/.test(format.url as string);
-        format.isHLS = /\/manifest\/hls_(variant|playlist)\//.test(format.url as string);
-        format.isDashMPD = /\/manifest\/dash\//.test(format.url as string);
+        format.isLive = /\bsource[/=]yt_(live|premiere)_broadcast\b/.test(format.url);
+        format.isHLS = /\/manifest\/hls_(variant|playlist)\//.test(format.url);
+        format.isDashMPD = /\/manifest\/dash\//.test(format.url);
         return format;
     }
 
@@ -105,7 +104,12 @@ export class Util extends null {
                             itag,
                             url,
                             type: reservedFormat.mimeType.split(';')[0],
-                            codec: reservedFormat.mimeType.split('"')[1]
+                            codec: reservedFormat.mimeType.split('"')[1],
+                            hasAudio: false,
+                            hasVideo: false,
+                            isLive: false,
+                            isHLS: false,
+                            isDashMPD: false
                         };
 
                         if (representation.$height) {
@@ -138,7 +142,12 @@ export class Util extends null {
                             itag,
                             url: line,
                             type: reservedFormat.mimeType.split(';')[0],
-                            codec: reservedFormat.mimeType.split('"')[1]
+                            codec: reservedFormat.mimeType.split('"')[1],
+                            hasAudio: false,
+                            hasVideo: false,
+                            isLive: false,
+                            isHLS: false,
+                            isDashMPD: false
                         };
 
                         hlsFormats.push(Util.getMetadataFormat(format));

@@ -34,7 +34,7 @@ const { createWriteStream } = require('fs');
     // Get info of video.
     const video = await getVideoInfo(result[0].url);
     // Get stream of selected format.
-    const stream = video.download(video.formats.find((f) => f.hasAudio));
+    const stream = video.download((f) => f.hasAudio);
     // Write to file.
     stream.pipe(createWriteStream('./manual_no_copyright_music.mp3'));
 })();

@@ -1,7 +1,6 @@
 import m3u8stream from 'm3u8stream';
 import { PassThrough } from 'node:stream';
 import { getVideoInfo } from './getVideoInfo';
-import { FormatError } from '../classes/Errors';
 import { DownloadOptions } from '../classes/YoutubeVideo';
 
 /**
@@ -11,18 +10,7 @@ import { DownloadOptions } from '../classes/YoutubeVideo';
  */
 export async function download(urlOrId: string, options?: DownloadOptions): Promise<m3u8stream.Stream | PassThrough> {
     const video = await getVideoInfo(urlOrId, true);
-    // This format is playable video or audio.
-    const playableFormats = video.formats.filter((f) =>
-        f.isLive ? f.isHLS : f.contentLength && (f.hasVideo || f.hasAudio)
-    );
-    // This format is suitable for live video or music bots.
-    const liveOrOpus = playableFormats.filter((f) => f.isLive || (f.codec === 'opus' && !f.hasVideo && f.hasAudio));
 
-    // Choose last available format because format is ascending order.
-    const format = liveOrOpus[liveOrOpus.length - 1] ?? playableFormats[playableFormats.length - 1];
-    if (!format) {
-        throw new FormatError();
-    }
-
-    return video.download(format, options);
+    // This format filter is suitable for live video or music bots.
+    return video.download((f) => f.isHLS || (f.codec === 'opus' && !f.hasVideo && f.hasAudio), options);
 }

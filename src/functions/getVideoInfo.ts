@@ -1,6 +1,6 @@
 import { request } from 'undici';
 import { YoutubeError, UrlError } from '../classes/Errors';
-import { YoutubeVideo, YoutubeVideoFormat } from '../classes/YoutubeVideo';
+import { YoutubeVideo } from '../classes/YoutubeVideo';
 import { YoutubeConfig } from '../util/config';
 import { Util } from '../util/Util';
 
@@ -26,19 +26,10 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
     const video = new YoutubeVideo(json);
 
     if (getLiveFormats) {
-        const dashUrl = json.streamingData?.dashManifestUrl;
         const hlsUrl = json.streamingData?.hlsManifestUrl;
 
-        const pending: Promise<YoutubeVideoFormat[]>[] = [];
-        if (dashUrl) {
-            pending.push(Util.getDashFormats(dashUrl));
-        }
         if (hlsUrl) {
-            pending.push(Util.getHlsFormats(hlsUrl));
-        }
-
-        for (const liveFormats of await Promise.all(pending)) {
-            video.liveFormats.push(...liveFormats);
+            video.liveFormats.push(...(await Util.getHlsFormats(hlsUrl)));
         }
     }
 

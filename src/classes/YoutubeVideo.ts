@@ -1,9 +1,11 @@
 import m3u8stream from 'm3u8stream';
 import { errors, request } from 'undici';
 import { PassThrough, Readable } from 'node:stream';
+import { FormatError } from './Errors';
 import { download } from '../functions/download';
 import { YoutubeConfig } from '../util/config';
 import { decipher } from '../util/decipher';
+import { formats as formatDatas } from '../util/formats';
 import { Util } from '../util/Util';
 
 export interface YoutubeVideoDetails {
@@ -34,9 +36,11 @@ export interface YoutubeVideoDetails {
 export interface YoutubeVideoFormat {
     itag: number;
     mimeType: string;
+    qualityLabel: string | null;
+    bitrate: number | null;
+    audioBitrate: number | null;
     codec: string;
     type: string;
-    bitrate: number | null;
     width?: number;
     height?: number;
     initRange?: {
@@ -56,24 +60,20 @@ export interface YoutubeVideoFormat {
     s?: string;
     sp?: string;
     fps?: number;
-    qualityLabel: string | null;
     projectionType?: 'RECTANGULAR';
     averageBitrate?: number;
     approxDurationMs?: number;
     signatureCipher?: string;
 
     // Provided by addFormats().
-    url?: string;
-
-    // Provided by itag format.
-    audioBitrate?: number | null;
+    url: string;
 
     // Provided by Util.getMetadataFormat().
-    hasAudio?: boolean;
-    hasVideo?: boolean;
-    isLive?: boolean;
-    isHLS?: boolean;
-    isDashMPD?: boolean;
+    hasAudio: boolean;
+    hasVideo: boolean;
+    isLive: boolean;
+    isHLS: boolean;
+    isDashMPD: boolean;
 }
 
 export interface DownloadOptions {
@@ -130,11 +130,24 @@ export class YoutubeVideo {
         return [...this.liveFormats, ...this.normalFormats];
     }
 
-    download(format: YoutubeVideoFormat, options: DownloadOptions = {}): m3u8stream.Stream | PassThrough {
-        if (format.isHLS || format.isDashMPD) {
-            const stream = m3u8stream(format.url as string, {
+    download(
+        formatFilter: (f: YoutubeVideoFormat) => boolean,
+        options: DownloadOptions = {}
+    ): m3u8stream.Stream | PassThrough {
+        // This format filter is playable video or audio.
+        const playableFormats = this.formats.filter((f) => f.isHLS || (f.contentLength && (f.hasVideo || f.hasAudio)));
+        const liveOrOpus = playableFormats.filter(formatFilter);
+
+        // Choose last available format because format is ascending order.
+        const format = liveOrOpus[liveOrOpus.length - 1] ?? playableFormats[playableFormats.length - 1];
+        if (!format) {
+            throw new FormatError();
+        }
+
+        if (format.isHLS) {
+            const stream = m3u8stream(format.url, {
                 id: String(format.itag),
-                parser: format.isHLS ? 'm3u8' : 'dash-mpd',
+                parser: 'm3u8',
                 highWaterMark: options.highWaterMark ?? 64 * 1024,
                 begin: options.begin ?? (format.isLive ? Date.now() : 0),
                 liveBuffer: options.liveBuffer ?? 4000,
@@ -181,7 +194,7 @@ export class YoutubeVideo {
 
             const getRangeChunk = async () => {
                 try {
-                    const { statusCode, body } = await request(format.url as string, {
+                    const { statusCode, body } = await request(format.url, {
                         headers: {
                             range: `bytes=${startBytes}-${endBytes >= (format.contentLength as number) ? '' : endBytes}`
                         },
@@ -243,10 +256,12 @@ export class YoutubeVideo {
     private addFormats(formats: any[]): void {
         for (const rawFormat of formats) {
             let format: YoutubeVideoFormat = {
+                ...formatDatas[rawFormat.itag as keyof typeof formatDatas],
                 itag: rawFormat.itag,
                 mimeType: rawFormat.mimeType,
-                type: rawFormat.mimeType.split(';')[0],
                 codec: rawFormat.mimeType.split('"')[1],
+                type: rawFormat.mimeType.split(';')[0],
+                qualityLabel: rawFormat.qualityLabel,
                 bitrate: rawFormat.bitrate,
                 width: rawFormat.width,
                 height: rawFormat.height,
@@ -262,11 +277,16 @@ export class YoutubeVideo {
                 contentLength: Number(rawFormat.contentLength),
                 quality: rawFormat.quality,
                 fps: rawFormat.fps,
-                qualityLabel: rawFormat.qualityLabel,
                 projectionType: rawFormat.projectionType,
                 averageBitrate: rawFormat.averageBitrate,
                 approxDurationMs: Number(rawFormat.approxDurationMs),
-                signatureCipher: rawFormat.signatureCipher ?? rawFormat.cipher
+                signatureCipher: rawFormat.signatureCipher ?? rawFormat.cipher,
+                url: '',
+                hasAudio: false,
+                hasVideo: false,
+                isLive: false,
+                isHLS: false,
+                isDashMPD: false
             };
 
             if (rawFormat.url && !format.signatureCipher) {
@@ -275,7 +295,7 @@ export class YoutubeVideo {
                 format = { ...format, ...Object.fromEntries(new URLSearchParams(format.signatureCipher)) };
             }
 
-            const url = new URL(format.url as string);
+            const url = new URL(format.url);
 
             url.searchParams.set('ratebypass', 'yes');
             if (YoutubeConfig.PLAYER_TOKENS && format.s) {
