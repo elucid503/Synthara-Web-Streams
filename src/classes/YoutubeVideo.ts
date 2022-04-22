@@ -136,10 +136,10 @@ export class YoutubeVideo {
     ): m3u8stream.Stream | PassThrough {
         // This format filter is playable video or audio.
         const playableFormats = this.formats.filter((f) => f.isHLS || (f.contentLength && (f.hasVideo || f.hasAudio)));
-        const liveOrOpus = playableFormats.filter(formatFilter);
+        const filteredFormats = playableFormats.filter(formatFilter);
 
         // Choose last available format because format is ascending order.
-        const format = liveOrOpus[liveOrOpus.length - 1] ?? playableFormats[playableFormats.length - 1];
+        const format = filteredFormats[filteredFormats.length - 1] ?? playableFormats[playableFormats.length - 1];
         if (!format) {
             throw new FormatError();
         }
