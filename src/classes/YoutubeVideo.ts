@@ -34,7 +34,7 @@ export interface YoutubeVideoDetails {
 }
 
 export interface YoutubeVideoFormat {
-    itag: number;
+    itag: keyof typeof formatDatas;
     mimeType: string;
     qualityLabel: string | null;
     bitrate: number | null;
@@ -255,52 +255,56 @@ export class YoutubeVideo {
 
     private addFormats(formats: any[]): void {
         for (const rawFormat of formats) {
-            const reservedFormat = formatDatas[rawFormat.itag as keyof typeof formatDatas];
-            const mimeType = rawFormat.mimeType ?? reservedFormat.mimeType;
-            let format: Partial<YoutubeVideoFormat> = {
-                itag: rawFormat.itag,
-                mimeType,
-                codec: mimeType.split('"')[1],
-                type: mimeType.split(';')[0],
-                qualityLabel: rawFormat.qualityLabel ?? reservedFormat.qualityLabel,
-                bitrate: rawFormat.bitrate ?? reservedFormat.bitrate,
-                audioBitrate: reservedFormat.audioBitrate,
-                width: rawFormat.width,
-                height: rawFormat.height,
-                initRange: {
-                    start: Number(rawFormat.initRange?.start),
-                    end: Number(rawFormat.initRange?.end)
-                },
-                indexRange: {
-                    start: Number(rawFormat.indexRange?.start),
-                    end: Number(rawFormat.indexRange?.end)
-                },
-                lastModifiedTimestamp: Number(rawFormat.lastModified),
-                contentLength: Number(rawFormat.contentLength),
-                quality: rawFormat.quality,
-                fps: rawFormat.fps,
-                projectionType: rawFormat.projectionType,
-                averageBitrate: rawFormat.averageBitrate,
-                approxDurationMs: Number(rawFormat.approxDurationMs),
-                signatureCipher: rawFormat.signatureCipher ?? rawFormat.cipher
-            };
+            const itag = rawFormat.itag as keyof typeof formatDatas;
+            const reservedFormat = formatDatas[itag];
 
-            if (rawFormat.url && !format.signatureCipher) {
-                format.url = rawFormat.url;
-            } else if (!rawFormat.url && format.signatureCipher) {
-                format = { ...format, ...Object.fromEntries(new URLSearchParams(format.signatureCipher)) };
+            if (reservedFormat) {
+                const mimeType = rawFormat.mimeType ?? reservedFormat.mimeType;
+                let format: Partial<YoutubeVideoFormat> = {
+                    itag,
+                    mimeType,
+                    codec: mimeType.split('"')[1],
+                    type: mimeType.split(';')[0],
+                    qualityLabel: rawFormat.qualityLabel ?? reservedFormat.qualityLabel,
+                    bitrate: rawFormat.bitrate ?? reservedFormat.bitrate,
+                    audioBitrate: reservedFormat.audioBitrate,
+                    width: rawFormat.width,
+                    height: rawFormat.height,
+                    initRange: {
+                        start: Number(rawFormat.initRange?.start),
+                        end: Number(rawFormat.initRange?.end)
+                    },
+                    indexRange: {
+                        start: Number(rawFormat.indexRange?.start),
+                        end: Number(rawFormat.indexRange?.end)
+                    },
+                    lastModifiedTimestamp: Number(rawFormat.lastModified),
+                    contentLength: Number(rawFormat.contentLength),
+                    quality: rawFormat.quality,
+                    fps: rawFormat.fps,
+                    projectionType: rawFormat.projectionType,
+                    averageBitrate: rawFormat.averageBitrate,
+                    approxDurationMs: Number(rawFormat.approxDurationMs),
+                    signatureCipher: rawFormat.signatureCipher ?? rawFormat.cipher
+                };
+
+                if (rawFormat.url && !format.signatureCipher) {
+                    format.url = rawFormat.url;
+                } else if (!rawFormat.url && format.signatureCipher) {
+                    format = { ...format, ...Object.fromEntries(new URLSearchParams(format.signatureCipher)) };
+                }
+
+                const url = new URL(format.url as string);
+
+                url.searchParams.set('ratebypass', 'yes');
+                if (YoutubeConfig.PLAYER_TOKENS && format.s) {
+                    url.searchParams.set(format.sp ?? 'signature', decipher(YoutubeConfig.PLAYER_TOKENS, format.s));
+                }
+
+                format.url = url.toString();
+
+                this.normalFormats.push(Util.getMetadataFormat(format as YoutubeVideoFormat));
             }
-
-            const url = new URL(format.url as string);
-
-            url.searchParams.set('ratebypass', 'yes');
-            if (YoutubeConfig.PLAYER_TOKENS && format.s) {
-                url.searchParams.set(format.sp ?? 'signature', decipher(YoutubeConfig.PLAYER_TOKENS, format.s));
-            }
-
-            format.url = url.toString();
-
-            this.normalFormats.push(Util.getMetadataFormat(format as YoutubeVideoFormat));
         }
     }
 }

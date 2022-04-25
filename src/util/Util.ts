@@ -99,12 +99,13 @@ export class Util extends null {
                     const reservedFormat = formats[itag];
 
                     if (reservedFormat) {
+                        const mimeType = reservedFormat.mimeType;
                         const format: Partial<YoutubeVideoFormat> = {
                             ...reservedFormat,
                             itag,
                             url,
-                            type: reservedFormat.mimeType.split(';')[0],
-                            codec: reservedFormat.mimeType.split('"')[1]
+                            type: mimeType.split(';')[0],
+                            codec: mimeType.split('"')[1]
                         };
 
                         if (representation.$height) {
@@ -132,12 +133,13 @@ export class Util extends null {
                     const reservedFormat = formats[itag];
 
                     if (reservedFormat) {
+                        const mimeType = reservedFormat.mimeType;
                         const format: Partial<YoutubeVideoFormat> = {
                             ...reservedFormat,
                             itag,
                             url: line,
-                            type: reservedFormat.mimeType.split(';')[0],
-                            codec: reservedFormat.mimeType.split('"')[1]
+                            type: mimeType.split(';')[0],
+                            codec: mimeType.split('"')[1]
                         };
 
                         hlsFormats.push(Util.getMetadataFormat(format as YoutubeVideoFormat));
