@@ -255,14 +255,16 @@ export class YoutubeVideo {
 
     private addFormats(formats: any[]): void {
         for (const rawFormat of formats) {
-            let format: YoutubeVideoFormat = {
-                ...formatDatas[rawFormat.itag as keyof typeof formatDatas],
+            const reservedFormat = formatDatas[rawFormat.itag as keyof typeof formatDatas];
+            const mimeType = rawFormat.mimeType ?? reservedFormat.mimeType;
+            let format: Partial<YoutubeVideoFormat> = {
                 itag: rawFormat.itag,
-                mimeType: rawFormat.mimeType,
-                codec: rawFormat.mimeType.split('"')[1],
-                type: rawFormat.mimeType.split(';')[0],
-                qualityLabel: rawFormat.qualityLabel,
-                bitrate: rawFormat.bitrate,
+                mimeType,
+                codec: mimeType.split('"')[1],
+                type: mimeType.split(';')[0],
+                qualityLabel: rawFormat.qualityLabel ?? reservedFormat.qualityLabel,
+                bitrate: rawFormat.bitrate ?? reservedFormat.bitrate,
+                audioBitrate: reservedFormat.audioBitrate,
                 width: rawFormat.width,
                 height: rawFormat.height,
                 initRange: {
@@ -280,13 +282,7 @@ export class YoutubeVideo {
                 projectionType: rawFormat.projectionType,
                 averageBitrate: rawFormat.averageBitrate,
                 approxDurationMs: Number(rawFormat.approxDurationMs),
-                signatureCipher: rawFormat.signatureCipher ?? rawFormat.cipher,
-                url: '',
-                hasAudio: false,
-                hasVideo: false,
-                isLive: false,
-                isHLS: false,
-                isDashMPD: false
+                signatureCipher: rawFormat.signatureCipher ?? rawFormat.cipher
             };
 
             if (rawFormat.url && !format.signatureCipher) {
@@ -295,7 +291,7 @@ export class YoutubeVideo {
                 format = { ...format, ...Object.fromEntries(new URLSearchParams(format.signatureCipher)) };
             }
 
-            const url = new URL(format.url);
+            const url = new URL(format.url as string);
 
             url.searchParams.set('ratebypass', 'yes');
             if (YoutubeConfig.PLAYER_TOKENS && format.s) {
@@ -304,7 +300,7 @@ export class YoutubeVideo {
 
             format.url = url.toString();
 
-            this.normalFormats.push(Util.getMetadataFormat(format));
+            this.normalFormats.push(Util.getMetadataFormat(format as YoutubeVideoFormat));
         }
     }
 }
