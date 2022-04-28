@@ -168,6 +168,7 @@ export class YoutubeSearchResults {
                 });
             }
         }
+
         this.totalPageCount++;
     }
 }
