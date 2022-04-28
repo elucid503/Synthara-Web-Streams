@@ -1,6 +1,10 @@
-import { YoutubeSearchResults } from '../classes/YoutubeSearchResults';
+import { YoutubeSearchResults, SearchType } from '../classes/YoutubeSearchResults';
 
-export async function getSearchInfo(query: string, limit: number, type?: string): Promise<YoutubeSearchResults> {
+export async function getSearchInfo(
+    query: string,
+    limit: number,
+    type?: keyof typeof SearchType
+): Promise<YoutubeSearchResults> {
     const searchResults = new YoutubeSearchResults(query, limit, type);
 
     await searchResults.init();

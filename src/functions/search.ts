@@ -1,12 +1,5 @@
 import { getSearchInfo } from './getSearchInfo';
-import { YoutubeSearchInfo } from '../classes/YoutubeSearchResults';
-
-const SearchType = {
-    video: 'EgIQAQ%3D%3D',
-    playlist: 'EgIQAw%3D%3D',
-    channel: 'EgIQAg%3D%3D',
-    all: ''
-} as const;
+import { YoutubeSearchInfo, SearchType } from '../classes/YoutubeSearchResults';
 
 export interface SearchOptions {
     type?: keyof typeof SearchType;
@@ -22,7 +15,7 @@ export async function search(
     query: string,
     { type = 'all', limit = 10 }: SearchOptions = {}
 ): Promise<YoutubeSearchInfo[]> {
-    const { results } = await getSearchInfo(query, limit, SearchType[type]);
+    const { results } = await getSearchInfo(query, limit, type);
 
     return results;
 }

@@ -6,6 +6,13 @@ import { Util } from '../util/Util';
 
 export type YoutubeSearchInfo = YoutubeCompactVideoInfo | YoutubeCompactListInfo | YoutubeCompactChannelInfo;
 
+export const SearchType = {
+    video: 'EgIQAQ%3D%3D',
+    playlist: 'EgIQAw%3D%3D',
+    channel: 'EgIQAg%3D%3D',
+    all: ''
+} as const;
+
 export class YoutubeSearchResults {
     estimatedResults = 0;
     totalPageCount = 0;
@@ -14,16 +21,16 @@ export class YoutubeSearchResults {
     private token: string | null = null;
     private query: string;
     private limit: number;
-    private type?: string;
+    private type: keyof typeof SearchType;
 
-    constructor(query: string, limit: number, type?: string) {
+    constructor(query: string, limit: number, type: keyof typeof SearchType = 'all') {
         this.query = query;
         this.limit = limit;
-        this.type = type;
+        this.type = SearchType[type] ? type : 'all';
     }
 
     get url(): string {
-        return Util.getSearchURL(this.query, this.type);
+        return Util.getSearchURL(this.query, SearchType[this.type]);
     }
 
     allLoaded(): boolean {
@@ -40,7 +47,7 @@ export class YoutubeSearchResults {
             body: JSON.stringify({
                 context: YoutubeConfig.INNERTUBE_CONTEXT,
                 query: this.query,
-                params: this.type ?? ''
+                params: SearchType[this.type]
             })
         });
         const json = await body.json();
@@ -99,7 +106,7 @@ export class YoutubeSearchResults {
             const list = data.playlistRenderer;
             const channel = data.channelRenderer;
 
-            if (video) {
+            if (video && (this.type === 'all' || this.type === 'video')) {
                 const rawViewCount: string =
                     video.viewCountText?.simpleText ?? video.viewCountText?.runs[0]?.text ?? '0';
                 const durationText: string = video.lengthText?.simpleText ?? '0:00';
@@ -131,7 +138,7 @@ export class YoutubeSearchResults {
                                 .thumbnails
                     }
                 });
-            } else if (list) {
+            } else if (list && (this.type === 'all' || this.type === 'playlist')) {
                 this.results.push({
                     type: 'playlist',
                     id: list.playlistId,
@@ -147,7 +154,7 @@ export class YoutubeSearchResults {
                         title: list.shortBylineText.runs[0].text
                     }
                 });
-            } else if (channel) {
+            } else if (channel && (this.type === 'all' || this.type === 'channel')) {
                 const subscriberCountText: string = channel.subscriberCountText?.simpleText ?? '0 subscribers';
 
                 this.results.push({
@@ -161,7 +168,6 @@ export class YoutubeSearchResults {
                 });
             }
         }
-
         this.totalPageCount++;
     }
 }
