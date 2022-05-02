@@ -126,9 +126,9 @@ export class YoutubeSearchResults {
                             .split(':')
                             .map(Number)
                             .reduce((acc: number, time: number) => 60 * acc + time) * 1000,
-                    durationText: durationText,
+                    durationText,
                     viewCount: Number(rawViewCount.replace(/\D/g, '')),
-                    viewCountText: viewCountText,
+                    viewCountText,
                     channel: {
                         id: video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId,
                         url: Util.getChannelURL(video.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId),
@@ -164,7 +164,7 @@ export class YoutubeSearchResults {
                     title: channel.title.simpleText,
                     thumbnails: channel.thumbnail.thumbnails,
                     verified: Boolean(channel.ownerBadges?.[0]?.metadataBadgeRenderer?.style?.includes('VERIFIED')),
-                    subscriberCountText: subscriberCountText
+                    subscriberCountText
                 });
             }
         }
