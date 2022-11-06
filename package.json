@@ -19,15 +19,15 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "fast-xml-parser": "^4.0.9",
+    "fast-xml-parser": "^4.0.11",
     "m3u8stream": "^0.8.6",
-    "undici": "^5.8.2"
+    "undici": "^5.12.0"
   },
   "devDependencies": {
-    "@types/node": "^18.7.3",
+    "@types/node": "^18.11.9",
     "prettier": "^2.7.1",
-    "tsup": "^6.2.2",
-    "typescript": "^4.7.4"
+    "tsup": "^6.4.0",
+    "typescript": "^4.8.4"
   },
   "keywords": [
     "download",
