@@ -13,7 +13,7 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
     const { body } = await request(Util.getApiURL('player'), {
         method: 'POST',
         body: JSON.stringify({
-            context: YoutubeConfig.INNERTUBE_ANDROID_CONTEXT,
+            context: YoutubeConfig.INNERTUBE_CONTEXT,
             videoId: videoId
         })
     });
