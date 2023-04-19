@@ -214,6 +214,9 @@ export class YoutubeVideo {
                     if (statusCode !== 206) {
                         if (statusCode === 403 && remainRetry > 0) {
                             // Retry download when status code is 403.
+                            if (remainRetry == 1) {
+                                await YoutubeConfig.fetchConfig();
+                            }
                             body.destroy();
                             nowBody = null;
                             options.resource = stream;

@@ -14,7 +14,18 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
         method: 'POST',
         body: JSON.stringify({
             context: YoutubeConfig.INNERTUBE_CONTEXT,
-            videoId: videoId
+            videoId: videoId,
+            playbackContext: {
+                contentPlaybackContext: {
+                    vis: 0,
+                    splay: false,
+                    autoCaptionsDefaultOn: false,
+                    autonavState: 'STATE_NONE',
+                    html5Preference: 'HTML5_PREF_WANTS',
+                    lactMilliseconds: '-1',
+                    signatureTimestamp: YoutubeConfig.STS
+                }
+            }
         })
     });
     const json = await body.json();

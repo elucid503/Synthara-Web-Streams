@@ -5,17 +5,18 @@ export class YoutubeConfig extends null {
     static INNERTUBE_API_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';
     static INNERTUBE_API_VERSION = 'v1';
     static INNERTUBE_CLIENT_NAME = 'WEB';
-    static INNERTUBE_CLIENT_VERSION = '2.20230414.01.00';
+    static INNERTUBE_CLIENT_VERSION = '2.20230417.01.00';
     static INNERTUBE_CONTEXT = {
         client: {
             hl: 'en',
             gl: 'US',
             clientName: 'WEB',
-            clientVersion: '2.20230414.01.00'
+            clientVersion: '2.20230417.01.00'
         },
         user: {},
         request: {}
     };
+    static STS = 0;
     static PLAYER_JS_URL = '';
     static PLAYER_TOKENS: string[] | null = null;
 
@@ -31,6 +32,7 @@ export class YoutubeConfig extends null {
                 json.INNERTUBE_CLIENT_NAME;
             YoutubeConfig.INNERTUBE_CONTEXT.client.clientVersion = YoutubeConfig.INNERTUBE_CLIENT_VERSION =
                 json.INNERTUBE_CLIENT_VERSION;
+            YoutubeConfig.STS = json.STS;
 
             if (YoutubeConfig.PLAYER_JS_URL !== json.PLAYER_JS_URL) {
                 const { body: player } = await request(`https://www.youtube.com${json.PLAYER_JS_URL}`);

@@ -1,6 +1,6 @@
 {
   "name": "youtube-dlsr",
-  "version": "2.8.0",
+  "version": "2.8.1",
   "description": "Simply used for youtube stream and search.",
   "license": "MIT",
   "author": "cjh980402 <9804cjh@naver.com> (https://github.com/cjh980402)",
@@ -19,7 +19,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "fast-xml-parser": "^4.2.1",
+    "fast-xml-parser": "^4.2.2",
     "m3u8stream": "^0.8.6",
     "undici": "^5.21.2"
   },
