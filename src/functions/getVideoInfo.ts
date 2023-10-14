@@ -28,7 +28,7 @@ export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = fa
             }
         })
     });
-    const json = await body.json();
+    const json = (await body.json()) as any;
 
     if (json.playabilityStatus?.status === 'ERROR') {
         throw new YoutubeError(json.playabilityStatus.reason);

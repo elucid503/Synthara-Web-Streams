@@ -174,7 +174,7 @@ export class YoutubeVideo {
 
             let nowBody: Readable | null = null;
 
-            let retryTimer: NodeJS.Timer | null = null;
+            let retryTimer: NodeJS.Timeout | null = null;
 
             const stream =
                 options.resource ??
@@ -188,7 +188,7 @@ export class YoutubeVideo {
                     .once('close', () => {
                         nowBody?.destroy();
                         nowBody = null;
-                        clearTimeout(retryTimer as NodeJS.Timer);
+                        clearTimeout(retryTimer as NodeJS.Timeout);
                         retryTimer = null;
                     });
 
@@ -196,7 +196,10 @@ export class YoutubeVideo {
                 try {
                     const { statusCode, body } = await request(format.url, {
                         headers: {
-                            range: `bytes=${startBytes}-${endBytes >= (format.contentLength as number) ? '' : endBytes}`
+                            range: `bytes=${startBytes}-${
+                                endBytes >= (format.contentLength as number) ? '' : endBytes
+                            }`,
+                            referer: 'https://www.youtube.com/'
                         },
                         maxRedirections: 10
                     });

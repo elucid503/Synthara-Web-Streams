@@ -14,7 +14,7 @@ export async function getTrendingInfo(): Promise<YoutubeTrending> {
 
     return new YoutubeTrending(
         (
-            await body.json()
+            (await body.json()) as any
         ).contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents
     );
 }

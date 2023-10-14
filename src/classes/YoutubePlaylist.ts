@@ -40,7 +40,7 @@ export class YoutubePlaylist {
                     playlistId: this.listId
                 })
             });
-            const json = await body.json();
+            const json = (await body.json()) as any;
 
             const { playlist } = json.contents.twoColumnWatchNextResults.playlist;
 
@@ -55,7 +55,7 @@ export class YoutubePlaylist {
                     browseId: `VL${this.listId}`
                 })
             });
-            const json = await body.json();
+            const json = (await body.json()) as any;
 
             const metadata = json.metadata.playlistMetadataRenderer;
 
@@ -82,7 +82,7 @@ export class YoutubePlaylist {
                 continuation: this.token
             })
         });
-        const json = await body.json();
+        const json = (await body.json()) as any;
 
         this.token = null;
 

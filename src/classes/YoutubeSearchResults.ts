@@ -50,7 +50,7 @@ export class YoutubeSearchResults {
                 params: SearchType[this.type]
             })
         });
-        const json = await body.json();
+        const json = (await body.json()) as any;
 
         this.estimatedResults = Number(json.estimatedResults);
 
@@ -79,7 +79,7 @@ export class YoutubeSearchResults {
                 continuation: this.token
             })
         });
-        const json = await body.json();
+        const json = (await body.json()) as any;
 
         this.token = null;
         this.estimatedResults = Number(json.estimatedResults);
