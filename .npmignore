@@ -1,8 +1,0 @@
-# folder
-src/
-node_modules/
-
-# file
-.prettierrc
-tsconfig.json
-tsup.config.json

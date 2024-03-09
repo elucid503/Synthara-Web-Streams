@@ -1,6 +1,6 @@
-/**
- * http://en.wikipedia.org/wiki/YouTube#Quality_and_formats
- */
+
+// Reference: http://en.wikipedia.org/wiki/YouTube#Quality_and_formats
+
 export const formats = {
     5: {
         mimeType: 'video/flv; codecs="Sorenson H.263, mp3"',

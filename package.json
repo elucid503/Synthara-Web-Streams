@@ -1,15 +1,15 @@
 {
-  "name": "youtube-dlsr",
-  "version": "2.8.3",
-  "description": "Simply used for youtube stream and search.",
+  "name": "synthara-web-streams",
+  "version": "1.0.0",
+  "description": "A lightweight version of youtube-dlsr to (further) improve speed and work on Bun with Proxy support.",
   "license": "MIT",
-  "author": "cjh980402 <9804cjh@naver.com> (https://github.com/cjh980402)",
-  "homepage": "https://github.com/cjh980402/youtube-dlsr",
+  "author": "cjh980402 & elucid",
+  "homepage": "https://github.com/elucid503/synthara-web-streams",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cjh980402/youtube-dlsr"
+    "url": "https://github.com/elucid503/synthara-web-streams"
   },
-  "bugs": "https://github.com/cjh980402/youtube-dlsr/issues",
+  "bugs": "https://github.com/elucid503/synthara-web-streams/issues",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "scripts": {
@@ -19,7 +19,6 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "fast-xml-parser": "^4.3.2",
     "m3u8stream": "^0.8.6",
     "undici": "^5.26.3"
   },

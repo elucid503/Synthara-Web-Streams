@@ -1,12 +1,16 @@
 import m3u8stream from 'm3u8stream';
-import { errors, request } from 'undici';
+import { request } from 'undici';
+
 import { PassThrough, Readable } from 'node:stream';
+
 import { FormatError } from './Errors';
-import { download } from '../functions/download';
-import { YoutubeConfig } from '../util/config';
+
 import { decipher } from '../util/decipher';
-import { formats as formatDatas } from '../util/formats';
-import { Util } from '../util/Util';
+
+import { formats as FormatStructs } from '../util/formats';
+import { Util, YoutubeConfig } from '../util';
+
+import { Download } from '../functions';
 
 export interface YoutubeVideoDetails {
     id: string;
@@ -34,7 +38,7 @@ export interface YoutubeVideoDetails {
 }
 
 export interface YoutubeVideoFormat {
-    itag: keyof typeof formatDatas;
+    itag: keyof typeof FormatStructs;
     mimeType: string;
     qualityLabel: string | null;
     bitrate: number | null;
@@ -91,7 +95,6 @@ export class YoutubeVideo {
 
     liveFormats: YoutubeVideoFormat[] = [];
     normalFormats: YoutubeVideoFormat[] = [];
-    tokens?: string[];
 
     constructor(json: any) {
         this.json = json;
@@ -130,7 +133,7 @@ export class YoutubeVideo {
         return [...this.liveFormats, ...this.normalFormats];
     }
 
-    download(
+    Download(
         formatFilter: (f: YoutubeVideoFormat) => boolean,
         options: DownloadOptions = {}
     ): m3u8stream.Stream | PassThrough {
@@ -204,12 +207,12 @@ export class YoutubeVideo {
                         maxRedirections: 10
                     });
                     nowBody = body.once('error', (error: Error) => {
-                        if (error instanceof errors.SocketError) {
+                        if (error.message.includes('ECONNRESET') || error.message.includes('ECONNREFUSED')) {
                             // Retry getRangeChunk when error is SocketError.
                             nowBody?.destroy();
                             nowBody = null;
                             retryTimer = setTimeout(getRangeChunk, 150);
-                        } else if (!(error instanceof errors.RequestAbortedError)) {
+                        } else {
                             stream.destroy(error);
                         }
                     });
@@ -222,7 +225,7 @@ export class YoutubeVideo {
                             options.resource = stream;
                             options.start = startBytes;
                             options.remainRetry = remainRetry - 1;
-                            retryTimer = setTimeout(download, 150, this.url, options);
+                            retryTimer = setTimeout(Download, 150, this.url, options);
                         } else {
                             stream.destroy(new Error(`Cannot retry download with status code ${statusCode}`));
                         }
@@ -258,8 +261,8 @@ export class YoutubeVideo {
 
     private addFormats(formats: any[]): void {
         for (const rawFormat of formats) {
-            const itag = rawFormat.itag as keyof typeof formatDatas;
-            const reservedFormat = formatDatas[itag];
+            const itag = rawFormat.itag as keyof typeof FormatStructs;
+            const reservedFormat = FormatStructs[itag];
 
             if (reservedFormat) {
                 const mimeType = rawFormat.mimeType ?? reservedFormat.mimeType;

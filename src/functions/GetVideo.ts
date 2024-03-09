@@ -1,10 +1,9 @@
 import { request } from 'undici';
-import { YoutubeError, UrlError } from '../classes/Errors';
-import { YoutubeVideo } from '../classes/YoutubeVideo';
-import { YoutubeConfig } from '../util/config';
-import { Util } from '../util/Util';
 
-export async function getVideoInfo(urlOrId: string, getLiveFormats: boolean = false): Promise<YoutubeVideo> {
+import { YoutubeError, UrlError, YoutubeVideo } from '../classes';
+import { Util, YoutubeConfig } from '../util';
+
+export async function GetVideo(urlOrId: string, getLiveFormats: boolean = false): Promise<YoutubeVideo> {
     const videoId = Util.getVideoId(urlOrId);
     if (!videoId) {
         throw new UrlError();
