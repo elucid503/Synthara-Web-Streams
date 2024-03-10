@@ -1,13 +1,13 @@
 import m3u8stream from 'm3u8stream';
 import { request } from 'undici';
 
-import { PassThrough, Readable } from 'node:stream';
+import { PassThrough, Readable } from 'stream';
 
 import { FormatError } from './Errors';
 
-import { decipher } from '../util/decipher';
+import { decipher } from '../util/Decipher';
 
-import { formats as FormatStructs } from '../util/formats';
+import { formats as FormatStructs } from '../util/Formats';
 import { Util, YoutubeConfig } from '../util';
 
 import { Download } from '../functions';
@@ -177,7 +177,7 @@ export class YoutubeVideo {
 
             let nowBody: Readable | null = null;
 
-            let retryTimer: NodeJS.Timeout | null = null;
+            let retryTimer: Timer | null = null;
 
             const stream =
                 options.resource ??

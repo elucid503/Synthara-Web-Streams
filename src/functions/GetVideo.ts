@@ -1,15 +1,13 @@
-import { request } from 'undici';
-
 import { YoutubeError, UrlError, YoutubeVideo } from '../classes';
 import { Util, YoutubeConfig } from '../util';
 
-export async function GetVideo(urlOrId: string, getLiveFormats: boolean = false): Promise<YoutubeVideo> {
+export async function GetVideo(urlOrId: string, getLiveFormats: boolean = false, Proxy?: { Host: string, Port: number }): Promise<YoutubeVideo> {
     const videoId = Util.getVideoId(urlOrId);
     if (!videoId) {
         throw new UrlError();
     }
 
-    const { body } = await request(Util.getApiURL('player'), {
+    const response = await fetch(Util.getApiURL('player'), {
         method: 'POST',
         body: JSON.stringify({
             context: YoutubeConfig.INNERTUBE_CONTEXT,
@@ -25,9 +23,12 @@ export async function GetVideo(urlOrId: string, getLiveFormats: boolean = false)
                     signatureTimestamp: YoutubeConfig.STS
                 }
             }
-        })
+        }),
+        proxy: Proxy ? `http://${Proxy.Host}:${Proxy.Port}` : undefined,
+        tls: { rejectUnauthorized: false }
     });
-    const json = (await body.json()) as any;
+
+    const json = await response.json() as any;
 
     if (json.playabilityStatus?.status === 'ERROR') {
         throw new YoutubeError(json.playabilityStatus.reason);

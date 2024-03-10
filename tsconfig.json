@@ -6,8 +6,9 @@
     "module": "commonjs",
     "declaration": true,
     "outDir": "./dist",
-    "moduleResolution": "node",
+    "moduleResolution": "Bundler",
     "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": ["bun-types"]
   }
 }

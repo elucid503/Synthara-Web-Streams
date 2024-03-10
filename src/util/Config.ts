@@ -1,5 +1,5 @@
 import { request } from 'undici';
-import { extractTokens } from './decipher';
+import { extractTokens } from './Decipher';
 
 export class YoutubeConfig extends null {
     static INNERTUBE_API_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';

@@ -1,7 +1,7 @@
 import { request } from 'undici';
 
-import { YoutubeConfig } from './config';
-import { formats } from './formats';
+import { YoutubeConfig } from './Config';
+import { formats } from './Formats';
 import { YoutubeVideoFormat } from '../classes';
 
 const videoRegex = /^[\w-]{11}$/;

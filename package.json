@@ -13,8 +13,8 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "scripts": {
-    "build": "npm run pretty && tsup-node",
-    "prepublish": "npm run build",
+    "build": "bun run pretty && tsup-node",
+    "prepublish": "bun run build",
     "pretty": "prettier --config .prettierrc --write 'src/**/*.ts'"
   },
   "types": "dist/index.d.ts",
@@ -23,7 +23,7 @@
     "undici": "^5.26.3"
   },
   "devDependencies": {
-    "@types/node": "^20.8.6",
+    "bun-types": "latest",
     "prettier": "^3.0.3",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2"
@@ -35,9 +35,6 @@
     "stream",
     "youtube"
   ],
-  "engines": {
-    "node": ">=14.0.0"
-  },
   "exports": {
     "import": "./dist/index.mjs",
     "require": "./dist/index.js"
