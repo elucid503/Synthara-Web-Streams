@@ -1,5 +1,3 @@
-import { request } from 'undici';
-
 import { YoutubeConfig } from './Config';
 import { formats } from './Formats';
 import { YoutubeVideoFormat } from '../classes';
@@ -48,9 +46,9 @@ export class Util extends null {
     static async getHlsFormats(url: string): Promise<YoutubeVideoFormat[]> {
         const hlsFormats: YoutubeVideoFormat[] = [];
         try {
-            const { body } = await request(url);
+            const response = await fetch(url);
 
-            for (const line of (await body.text()).split('\n')) {
+            for (const line of (await response.text()).split('\n')) {
                 if (/^https?:\/\//.test(line)) {
                     const itag = Number(/\/itag\/(\d+)\//.exec(line)?.[1]) as keyof typeof formats;
                     const reservedFormat = formats[itag];

@@ -19,10 +19,11 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "m3u8stream": "^0.8.6",
-    "undici": "^5.26.3"
+    "https-proxy-agent": "^7.0.4",
+    "m3u8stream": "^0.8.6"
   },
   "devDependencies": {
+    "@types/node": "^20.11.25",
     "bun-types": "latest",
     "prettier": "^3.0.3",
     "tsup": "^7.2.0",

@@ -1,7 +1,8 @@
 import m3u8stream from 'm3u8stream';
-import { PassThrough } from 'node:stream';
+import { PassThrough } from 'stream';
+
 import { GetVideo } from './GetVideo';
-import { DownloadOptions } from '../classes/YoutubeVideo';
+import { DownloadOptions } from '../classes';
 
 /**
  * Downloads a YouTube stream using its url or id.

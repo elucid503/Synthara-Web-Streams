@@ -1,4 +1,3 @@
-import { request } from 'undici';
 import { extractTokens } from './Decipher';
 
 export class YoutubeConfig extends null {
@@ -22,9 +21,9 @@ export class YoutubeConfig extends null {
 
     static async fetchConfig(): Promise<void> {
         try {
-            const { body } = await request('https://www.youtube.com/?hl=en');
+            const response = await fetch('https://www.youtube.com/?hl=en');
 
-            const json = JSON.parse((/ytcfg.set\(({.+?})\);/s.exec(await body.text()) as RegExpExecArray)[1]);
+            const json = JSON.parse((/ytcfg.set\(({.+?})\);/s.exec(await response.text()) as RegExpExecArray)[1]);
 
             YoutubeConfig.INNERTUBE_API_KEY = json.INNERTUBE_API_KEY;
             YoutubeConfig.INNERTUBE_API_VERSION = json.INNERTUBE_API_VERSION;
@@ -35,9 +34,10 @@ export class YoutubeConfig extends null {
             YoutubeConfig.STS = json.STS;
 
             if (YoutubeConfig.PLAYER_JS_URL !== json.PLAYER_JS_URL) {
-                const { body: player } = await request(`https://www.youtube.com${json.PLAYER_JS_URL}`);
+                const response = await fetch(`https://www.youtube.com${json.PLAYER_JS_URL}`);
+                const player = await response.text();
                 YoutubeConfig.PLAYER_JS_URL = json.PLAYER_JS_URL;
-                YoutubeConfig.PLAYER_TOKENS = extractTokens(await player.text());
+                YoutubeConfig.PLAYER_TOKENS = extractTokens(player);
             }
 
             setTimeout(YoutubeConfig.fetchConfig, 120 * 60 * 1000);

@@ -10,23 +10,17 @@ async function Main() {
 
     console.timeEnd("Time taken to fetch video info")
 
-    console.log(info);
+    console.time("Time taken to init audio stream")
 
-    console.log(info.formats[0].url);
+    const stream = info.Download(f => f.hasAudio && !f.hasVideo, { begin: 50, start: 50 }, { Host: "181.177.65.138", Port: 3199 });
 
-    // console.time("Time taken to init audio stream")
-    //
-    // const stream = info.Download(f => f.hasAudio && !f.hasVideo);
-    //
-    // stream.on("data", (chunk) => {
-    //     console.timeEnd("Time taken to init audio stream")
-    //     console.log(chunk);
-    // });
-    //
-    // stream.on("end", () => {
-    //     console.log("Stream ended");
-    // });
+    stream.on("data", (chunk) => {
+        console.timeEnd("Time taken to init audio stream")
+    });
 
+    stream.on("end", () => {
+        console.log("Stream ended");
+    });
 
 }
 

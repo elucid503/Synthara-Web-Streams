@@ -1,5 +1,4 @@
 import m3u8stream from 'm3u8stream';
-import { request } from 'undici';
 
 import { PassThrough, Readable } from 'stream';
 
@@ -11,6 +10,7 @@ import { formats as FormatStructs } from '../util/Formats';
 import { Util, YoutubeConfig } from '../util';
 
 import { Download } from '../functions';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 export interface YoutubeVideoDetails {
     id: string;
@@ -135,7 +135,8 @@ export class YoutubeVideo {
 
     Download(
         formatFilter: (f: YoutubeVideoFormat) => boolean,
-        options: DownloadOptions = {}
+        options: DownloadOptions = {},
+        Proxy?: { Host: string, Port: number }
     ): m3u8stream.Stream | PassThrough {
         // This format filter is playable video or audio.
         const playableFormats = this.formats.filter((f) => f.isHLS || (f.contentLength && (f.hasVideo || f.hasAudio)));
@@ -157,7 +158,8 @@ export class YoutubeVideo {
                 requestOptions: {
                     maxReconnects: Infinity,
                     maxRetries: 10,
-                    backoff: { inc: 20, max: 100 }
+                    backoff: { inc: 20, max: 100 },
+                    agent: Proxy ? new HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : undefined
                 }
             });
 
@@ -196,66 +198,79 @@ export class YoutubeVideo {
                     });
 
             const getRangeChunk = async () => {
+
                 try {
-                    const { statusCode, body } = await request(format.url, {
+
+                    const response = await fetch(format.url, {
+
                         headers: {
                             range: `bytes=${startBytes}-${
                                 endBytes >= (format.contentLength as number) ? '' : endBytes
                             }`,
                             referer: 'https://www.youtube.com/'
                         },
-                        maxRedirections: 10
-                    });
-                    nowBody = body.once('error', (error: Error) => {
-                        if (error.message.includes('ECONNRESET') || error.message.includes('ECONNREFUSED')) {
-                            // Retry getRangeChunk when error is SocketError.
-                            nowBody?.destroy();
-                            nowBody = null;
-                            retryTimer = setTimeout(getRangeChunk, 150);
-                        } else {
-                            stream.destroy(error);
-                        }
+                        redirect: "follow",
+                        proxy: Proxy ? `http://${Proxy.Host}:${Proxy.Port}` : undefined,
+                        tls: { rejectUnauthorized: false }
+
                     });
 
-                    if (statusCode !== 206) {
-                        if (statusCode === 403 && remainRetry > 0) {
+                    if (!response.ok) {
+
+                        if (response.status === 403 && remainRetry > 0) {
+
                             // Retry download when status code is 403.
-                            body.destroy();
-                            nowBody = null;
                             options.resource = stream;
                             options.start = startBytes;
                             options.remainRetry = remainRetry - 1;
-                            retryTimer = setTimeout(Download, 150, this.url, options);
+                            retryTimer = setTimeout(Download, 150, this.url, options)
+
                         } else {
-                            stream.destroy(new Error(`Cannot retry download with status code ${statusCode}`));
+
+                            stream.destroy(new Error(`Cannot retry download with status code ${response.status}`));
+
                         }
+
                         return;
+
                     }
 
-                    body.on('data', (chunk: Buffer) => {
+                    const reader = response.body?.getReader();
+                    if (!reader) { throw new Error('Cannot get readable stream from response body.'); }
+
+                    let chunk = await reader.read();
+
+                    while (!chunk.done) {
+
                         if (stream.destroyed) {
                             return;
                         }
-                        startBytes += chunk.length;
-                        if (!stream.write(chunk)) {
-                            nowBody?.pause();
-                            awaitDrain = () => nowBody?.resume();
+
+                        startBytes += chunk.value.length;
+                        if (!stream.write(chunk.value)) {
+                            await new Promise(resolve => stream.once('drain', resolve));
                         }
-                    }).once('end', () => {
-                        if (stream.destroyed || startBytes >= (format.contentLength as number)) {
-                            return;
-                        }
-                        endBytes = startBytes + downloadChunkSize;
-                        getRangeChunk();
-                    });
+
+                        chunk = await reader.read();
+
+                    }
+
+                    if (stream.destroyed || startBytes >= (format.contentLength as number)) {
+                        return;
+                    }
+
+                    endBytes = startBytes + downloadChunkSize;
+                    getRangeChunk();
+
                 } catch (error) {
                     stream.destroy(error as Error);
                 }
+
             };
 
             getRangeChunk();
-
             return stream;
+
         }
     }
 
