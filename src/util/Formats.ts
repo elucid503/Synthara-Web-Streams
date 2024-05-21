@@ -1,4 +1,3 @@
-
 // Reference: http://en.wikipedia.org/wiki/YouTube#Quality_and_formats
 
 export const formats = {

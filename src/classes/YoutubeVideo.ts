@@ -136,7 +136,7 @@ export class YoutubeVideo {
     Download(
         formatFilter: (f: YoutubeVideoFormat) => boolean,
         options: DownloadOptions = {},
-        Proxy?: { Host: string, Port: number }
+        Proxy?: { Host: string; Port: number }
     ): m3u8stream.Stream | PassThrough {
         // This format filter is playable video or audio.
         const playableFormats = this.formats.filter((f) => f.isHLS || (f.contentLength && (f.hasVideo || f.hasAudio)));
@@ -198,61 +198,51 @@ export class YoutubeVideo {
                     });
 
             const getRangeChunk = async () => {
-
                 try {
-
                     const response = await fetch(format.url, {
-
                         headers: {
                             range: `bytes=${startBytes}-${
                                 endBytes >= (format.contentLength as number) ? '' : endBytes
                             }`,
                             referer: 'https://www.youtube.com/'
                         },
-                        redirect: "follow",
+                        redirect: 'follow',
                         proxy: Proxy ? `http://${Proxy.Host}:${Proxy.Port}` : undefined,
                         tls: { rejectUnauthorized: false }
-
                     });
 
                     if (!response.ok) {
-
                         if (response.status === 403 && remainRetry > 0) {
-
                             // Retry download when status code is 403.
                             options.resource = stream;
                             options.start = startBytes;
                             options.remainRetry = remainRetry - 1;
-                            retryTimer = setTimeout(Download, 150, this.url, options)
-
+                            retryTimer = setTimeout(Download, 150, this.url, options);
                         } else {
-
                             stream.destroy(new Error(`Cannot retry download with status code ${response.status}`));
-
                         }
 
                         return;
-
                     }
 
                     const reader = response.body?.getReader();
-                    if (!reader) { throw new Error('Cannot get readable stream from response body.'); }
+                    if (!reader) {
+                        throw new Error('Cannot get readable stream from response body.');
+                    }
 
                     let chunk = await reader.read();
 
                     while (!chunk.done) {
-
                         if (stream.destroyed) {
                             return;
                         }
 
                         startBytes += chunk.value.length;
                         if (!stream.write(chunk.value)) {
-                            await new Promise(resolve => stream.once('drain', resolve));
+                            await new Promise((resolve) => stream.once('drain', resolve));
                         }
 
                         chunk = await reader.read();
-
                     }
 
                     if (stream.destroyed || startBytes >= (format.contentLength as number)) {
@@ -261,16 +251,13 @@ export class YoutubeVideo {
 
                     endBytes = startBytes + downloadChunkSize;
                     getRangeChunk();
-
                 } catch (error) {
                     stream.destroy(error as Error);
                 }
-
             };
 
             getRangeChunk();
             return stream;
-
         }
     }
 
