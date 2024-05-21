@@ -1,6 +1,9 @@
+import Parser from "m3u8-parser";
+
 import { YoutubeConfig } from './Config';
-import { formats } from './Formats';
 import { YoutubeVideoFormat } from '../classes';
+import { inspect } from 'util';
+import { formats } from "./Formats";
 
 const videoRegex = /^[\w-]{11}$/;
 const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts)\/)/;
@@ -43,31 +46,129 @@ export class Util extends null {
         return format;
     }
 
-    static async getHlsFormats(url: string): Promise<YoutubeVideoFormat[]> {
-        const hlsFormats: YoutubeVideoFormat[] = [];
+    static async GetHLSFormats(URL: string): Promise<YoutubeVideoFormat[]> {
+
+        const Formats: YoutubeVideoFormat[] = [];
+        
         try {
-            const response = await fetch(url);
 
-            for (const line of (await response.text()).split('\n')) {
-                if (/^https?:\/\//.test(line)) {
-                    const itag = Number(/\/itag\/(\d+)\//.exec(line)?.[1]) as keyof typeof formats;
-                    const reservedFormat = formats[itag];
+            const Resp = await fetch(URL);
 
-                    if (reservedFormat) {
-                        const mimeType = reservedFormat.mimeType;
-                        const format: Partial<YoutubeVideoFormat> = {
-                            ...reservedFormat,
-                            itag,
-                            url: line,
-                            type: mimeType.split(';')[0],
-                            codec: mimeType.split('"')[1]
-                        };
+            if (!Resp.ok) {
 
-                        hlsFormats.push(Util.getMetadataFormat(format as YoutubeVideoFormat));
-                    }
-                }
+                throw new Error(`HTTP error! status: ${Resp.status}`);
+
             }
-        } catch {}
-        return hlsFormats;
+
+        
+            const TxtResp = await Resp.text();
+
+            if (!TxtResp) {
+
+                throw new Error("No response body");
+
+            }
+            
+            var parser = new Parser.Parser();
+
+            parser.push(TxtResp);
+            parser.end();
+            
+            const Manifest = parser.manifest;
+
+            const audioGroups = Manifest.mediaGroups.AUDIO || {};
+            const audioFormats: { [key: string]: YoutubeVideoFormat } = {};
+
+            for (const groupId in audioGroups) {
+
+                for (const variant in audioGroups[groupId]) {
+
+                    const audioVariant = audioGroups[groupId][variant];
+                    const itag = parseInt(audioVariant.uri.match(/itag\/(\d+)/)[1]);
+
+                    audioFormats[groupId] = {
+
+                        itag: itag as keyof typeof formats,
+                        mimeType: 'audio/mp4', // Assumed based on example
+                        qualityLabel: null,
+                        bitrate: null,
+                        audioBitrate: null,
+                        codec: audioVariant.codecs,
+                        type: 'audio',
+                        url: audioVariant.uri,
+                        hasAudio: true,
+                        hasVideo: false,
+                        isLive: false,
+                        isHLS: true,
+                        isDashMPD: false
+
+                    };
+                    
+                }
+
+            }
+
+            // Process video playlists
+
+            for (const playlist of Manifest.playlists) {
+
+                const attributes = playlist.attributes;
+                const itag = parseInt(playlist.uri.match(/itag\/(\d+)/)[1]);
+                const audioGroupId = attributes.AUDIO;
+
+                const format: YoutubeVideoFormat = {
+
+                    itag: itag as keyof typeof formats,
+                    mimeType: `video/mp4; codecs="${attributes.CODECS}"`,
+                    qualityLabel: `${attributes.RESOLUTION.height}p`,
+                    bitrate: attributes.BANDWIDTH,
+                    audioBitrate: null,
+                    codec: attributes.CODECS,
+                    type: 'video',
+                    width: attributes.RESOLUTION.width,
+                    height: attributes.RESOLUTION.height,
+                    fps: attributes['FRAME-RATE'],
+                    url: playlist.uri,
+                    hasAudio: audioGroupId ? true : false,
+                    hasVideo: true,
+                    isLive: false,
+                    isHLS: true,
+                    isDashMPD: false
+
+                };
+
+                if (audioGroupId && audioFormats[audioGroupId]) {
+
+                    format.audioBitrate = audioFormats[audioGroupId].audioBitrate;
+
+                }
+
+                Formats.push(format);
+
+            }
+
+            // Push any audio formats that were not associated with a video format
+
+            for (const groupId in audioFormats) {
+
+                if (!Formats.some(f => f.url === audioFormats[groupId].url)) {
+
+                    Formats.push(audioFormats[groupId]);
+
+                }
+
+            }
+
+        } catch (error) {
+            
+            console.error('Error fetching or parsing the HLS formats:', error);
+            return [];
+            
+        }
+
+        return Formats;
+    
     }
+
 }
+

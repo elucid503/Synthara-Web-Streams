@@ -1,8 +1,8 @@
 import { YoutubeError, UrlError, YoutubeVideo } from '../classes';
 import { Util, YoutubeConfig } from '../util';
 
-export async function GetVideo(urlOrId: string, getLiveFormats: boolean = false, Proxy?: { Host: string, Port: number }): Promise<YoutubeVideo> {
-    const videoId = Util.getVideoId(urlOrId);
+export async function GetVideo(URLorID: string, GetHLSFormats: boolean = false, Proxy?: { Host: string, Port: number }): Promise<YoutubeVideo> {
+    const videoId = Util.getVideoId(URLorID);
     if (!videoId) {
         throw new UrlError();
     }
@@ -29,18 +29,23 @@ export async function GetVideo(urlOrId: string, getLiveFormats: boolean = false,
     });
 
     const json = await response.json() as any;
-
+    
     if (json.playabilityStatus?.status === 'ERROR') {
         throw new YoutubeError(json.playabilityStatus.reason);
     }
 
     const video = new YoutubeVideo(json);
 
-    if (getLiveFormats) {
+    if (GetHLSFormats) {
+
         const hlsUrl = json.streamingData?.hlsManifestUrl;
 
         if (hlsUrl) {
-            video.liveFormats.push(...(await Util.getHlsFormats(hlsUrl)));
+
+            const HLSFormats = await Util.GetHLSFormats(hlsUrl);
+
+            video.liveFormats.push(...HLSFormats);
+
         }
     }
 
