@@ -27,8 +27,6 @@ export class YoutubeConfig extends null {
 
             YoutubeConfig.INNERTUBE_API_KEY = json.INNERTUBE_API_KEY;
             YoutubeConfig.INNERTUBE_API_VERSION = json.INNERTUBE_API_VERSION;
-            YoutubeConfig.INNERTUBE_CONTEXT.client.clientName = YoutubeConfig.INNERTUBE_CLIENT_NAME =
-                json.INNERTUBE_CLIENT_NAME;
             YoutubeConfig.INNERTUBE_CONTEXT.client.clientVersion = YoutubeConfig.INNERTUBE_CLIENT_VERSION =
                 json.INNERTUBE_CLIENT_VERSION;
             YoutubeConfig.STS = json.STS;
