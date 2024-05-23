@@ -1,7 +1,7 @@
 import { GetVideo } from './functions';
 
 async function Main() {
-    let url = 'https://youtu.be/RmlQA3kEUGQ';
+    let url = 'https://www.youtube.com/watch?v=XDMg06hw97U';
 
     console.time('Time taken to fetch video info');
 
