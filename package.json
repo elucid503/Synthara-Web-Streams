@@ -1,6 +1,6 @@
 {
   "name": "synthara-web-streams",
-  "version": "1.1.2",
+  "version": "1.1.4",
   "description": "A lightweight version of youtube-dlsr to (further) improve speed and work on Bun with Proxy support.",
   "license": "MIT",
   "author": "cjh980402 & elucid",

@@ -91,7 +91,7 @@ export interface DownloadOptions {
 }
 
 export class YoutubeVideo {
-    private json: any;
+    json: any;
 
     liveFormats: YoutubeVideoFormat[] = [];
     normalFormats: YoutubeVideoFormat[] = [];
