@@ -2,10 +2,10 @@
   "clean": true,
   "dts": true,
   "entry": ["src/index.ts"],
-  "format": ["cjs"],
-  "minify": true,
+  "format": ["cjs", "esm"],
+  "minify": false,
   "sourcemap": true,
   "splitting": false,
-  "target": "es2020",
+  "target": "ES6",
   "tsconfig": "./tsconfig.json"
 }

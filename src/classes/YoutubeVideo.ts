@@ -181,7 +181,7 @@ export class YoutubeVideo {
 
             let nowBody: Readable | null = null;
 
-            let retryTimer: Timer | null = null;
+            let retryTimer: NodeJS.Timeout | null = null;
 
             const stream =
                 options.resource ??
