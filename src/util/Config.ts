@@ -9,10 +9,10 @@ export class YoutubeConfig extends null {
     static INNERTUBE_CLIENT_VERSION = '2.20231012.01.03';
     static INNERTUBE_CONTEXT = {
         client: {
-            'clientName': 'IOS',
-            'clientVersion': '19.09.3',
-            'deviceModel': 'iPhone14,3',
-            'userAgent': 'com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)'
+            clientName: 'IOS',
+            clientVersion: '19.09.3',
+            deviceModel: 'iPhone14,3',
+            userAgent: 'com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)'
         }
     };
     static STS = 0;

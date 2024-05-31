@@ -1,3 +1,5 @@
+import Axios from 'axios';
+
 import m3u8stream from 'm3u8stream';
 
 import { PassThrough, Readable } from 'stream';
@@ -199,19 +201,17 @@ export class YoutubeVideo {
 
             const getRangeChunk = async () => {
                 try {
-                    const response = await fetch(format.url, {
+                    const response = await Axios(format.url, {
                         headers: {
                             range: `bytes=${startBytes}-${
                                 endBytes >= (format.contentLength as number) ? '' : endBytes
                             }`,
                             referer: 'https://www.youtube.com/'
                         },
-                        redirect: 'follow',
-                        proxy: Proxy ? `http://${Proxy.Host}:${Proxy.Port}` : undefined,
-                        tls: { rejectUnauthorized: false }
+                        proxy: Proxy ? { host: Proxy.Host, port: Proxy.Port } : false
                     });
 
-                    if (!response.ok) {
+                    if (response.status[0] !== 2) {
                         if (response.status === 403 && remainRetry > 0) {
                             // Retry download when status code is 403.
                             options.resource = stream;
@@ -225,7 +225,7 @@ export class YoutubeVideo {
                         return;
                     }
 
-                    const reader = response.body?.getReader();
+                    const reader = response.data as Readable;
                     if (!reader) {
                         throw new Error('Cannot get readable stream from response body.');
                     }

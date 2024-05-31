@@ -1,3 +1,5 @@
+import Axios from 'axios';
+
 import { YoutubeError, UrlError, YoutubeVideo } from '../classes';
 import { Util, YoutubeConfig } from '../util';
 
@@ -11,9 +13,10 @@ export async function GetVideo(
         throw new UrlError();
     }
 
-    const response = await fetch(Util.getApiURL('player'), {
-        method: 'POST',
-        body: JSON.stringify({
+    const response = await Axios({
+        url: Util.getApiURL('player'),
+        method: 'post',
+        data: {
             context: YoutubeConfig.INNERTUBE_CONTEXT,
             videoId: videoId,
             playbackContext: {
@@ -27,12 +30,12 @@ export async function GetVideo(
                     signatureTimestamp: YoutubeConfig.STS
                 }
             }
-        }),
-        proxy: Proxy ? `http://${Proxy.Host}:${Proxy.Port}` : undefined,
-        tls: { rejectUnauthorized: false }
+        },
+        proxy: Proxy ? { host: Proxy.Host, port: Proxy.Port } : undefined,
+        httpsAgent: new (require('https').Agent)({ rejectUnauthorized: false })
     });
 
-    const json = (await response.json()) as any;
+    const json = (await response.data) as any;
 
     if (json.playabilityStatus?.status === 'ERROR') {
         throw new YoutubeError(json.playabilityStatus.reason);
