@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.YoutubeVideo = void 0;
+const https_1 = __importDefault(require("https"));
 const axios_1 = __importDefault(require("axios"));
 const m3u8stream_1 = __importDefault(require("m3u8stream"));
 const stream_1 = require("stream");
@@ -79,7 +80,7 @@ class YoutubeVideo {
                     maxReconnects: Infinity,
                     maxRetries: 10,
                     backoff: { inc: 20, max: 100 },
-                    agent: Proxy ? new https_proxy_agent_1.HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : undefined
+                    agent: Proxy ? new https_proxy_agent_1.HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : undefined,
                 }
             });
             stream.once('close', () => {
@@ -113,7 +114,10 @@ class YoutubeVideo {
                             range: `bytes=${startBytes}-${endBytes >= format.contentLength ? '' : endBytes}`,
                             referer: 'https://www.youtube.com/'
                         },
-                        proxy: Proxy ? { host: Proxy.Host, port: Proxy.Port } : false
+                        proxy: Proxy ? { host: Proxy.Host, port: Proxy.Port } : false,
+                        httpsAgent: new https_1.default.Agent({
+                            rejectUnauthorized: false
+                        })
                     });
                     if (response.status[0] !== 2) {
                         if (response.status === 403 && remainRetry > 0) {

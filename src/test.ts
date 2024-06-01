@@ -1,16 +1,15 @@
+import { YoutubeVideo } from "./classes";
 import { GetVideo } from "./functions";
 
 async function Main() {
 
-    let url = 'https://www.youtube.com/watch?v=XDMg06hw97U';
-
-    console.time('Time taken to fetch video info');
+    const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 
     const info = await GetVideo(url, true);
     
-    console.log(info);
+    const NewVideo = new YoutubeVideo(info.json, info.liveFormats);
 
-    const format = info.formats.filter((f) => !f.hasVideo && f.hasAudio && f.isHLS);
+    const format = NewVideo.formats.filter((f) => !f.hasVideo && f.hasAudio && f.isHLS);
 
     console.log(format);
 

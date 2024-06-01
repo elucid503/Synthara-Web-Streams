@@ -20,8 +20,6 @@ class YoutubeConfig extends null {
                 const json = JSON.parse(/ytcfg.set\(({.+?})\);/s.exec(yield response.text())[1]);
                 YoutubeConfig.INNERTUBE_API_KEY = json.INNERTUBE_API_KEY;
                 YoutubeConfig.INNERTUBE_API_VERSION = json.INNERTUBE_API_VERSION;
-                YoutubeConfig.INNERTUBE_CONTEXT.client.clientVersion = YoutubeConfig.INNERTUBE_CLIENT_VERSION =
-                    json.INNERTUBE_CLIENT_VERSION;
                 YoutubeConfig.STS = json.STS;
                 if (YoutubeConfig.PLAYER_JS_URL !== json.PLAYER_JS_URL) {
                     const response = yield fetch(`https://www.youtube.com${json.PLAYER_JS_URL}`);

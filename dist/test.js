@@ -20,4 +20,4 @@ function Main() {
         console.log(format);
     });
 }
-Main();
+setTimeout(Main, 1000);

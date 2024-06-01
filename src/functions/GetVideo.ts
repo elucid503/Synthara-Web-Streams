@@ -1,3 +1,5 @@
+import https from 'https';
+
 import Axios from 'axios';
 
 import { YoutubeError, UrlError, YoutubeVideo } from '../classes';
@@ -32,7 +34,9 @@ export async function GetVideo(
             }
         },
         proxy: Proxy ? { host: Proxy.Host, port: Proxy.Port } : undefined,
-        httpsAgent: new (require('https').Agent)({ rejectUnauthorized: false })
+        httpsAgent: new https.Agent({  
+            rejectUnauthorized: false
+        })
     });
 
     const json = (await response.data) as any;

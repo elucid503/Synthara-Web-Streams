@@ -1,3 +1,5 @@
+import https from 'https';
+
 import Axios from 'axios';
 
 import m3u8stream from 'm3u8stream';
@@ -98,8 +100,9 @@ export class YoutubeVideo {
     liveFormats: YoutubeVideoFormat[] = [];
     normalFormats: YoutubeVideoFormat[] = [];
 
-    constructor(json: any) {
+    constructor(json: any, liveFormats: YoutubeVideoFormat[] = []) {
         this.json = json;
+        this.liveFormats = liveFormats;
 
         this.addFormats([...(json.streamingData?.formats ?? []), ...(json.streamingData?.adaptiveFormats ?? [])]);
     }
@@ -161,7 +164,7 @@ export class YoutubeVideo {
                     maxReconnects: Infinity,
                     maxRetries: 10,
                     backoff: { inc: 20, max: 100 },
-                    agent: Proxy ? new HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : undefined
+                    agent: Proxy ? new HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : undefined,
                 }
             });
 
@@ -208,7 +211,10 @@ export class YoutubeVideo {
                             }`,
                             referer: 'https://www.youtube.com/'
                         },
-                        proxy: Proxy ? { host: Proxy.Host, port: Proxy.Port } : false
+                        proxy: Proxy ? { host: Proxy.Host, port: Proxy.Port } : false,
+                        httpsAgent: new https.Agent({  
+                            rejectUnauthorized: false
+                        })
                     });
 
                     if (response.status[0] !== 2) {
