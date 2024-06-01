@@ -5,7 +5,7 @@ async function Main() {
 
     console.time('Time taken to fetch video info');
 
-    const info = await GetVideo(url);
+    const info = await GetVideo(url, true);
     
     console.log(info);
 

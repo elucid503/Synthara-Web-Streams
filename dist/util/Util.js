@@ -8,12 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Util = void 0;
-const m3u8_parser_1 = __importDefault(require("m3u8-parser"));
+const m3u8_parser_1 = require("m3u8-parser");
 const Config_1 = require("./Config");
 const videoRegex = /^[\w-]{11}$/;
 const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts)\/)/;
@@ -65,7 +62,7 @@ class Util extends null {
                 if (!TxtResp) {
                     throw new Error('No response body');
                 }
-                var parser = new m3u8_parser_1.default.Parser();
+                var parser = new m3u8_parser_1.Parser();
                 parser.push(TxtResp);
                 parser.end();
                 const Manifest = parser.manifest;

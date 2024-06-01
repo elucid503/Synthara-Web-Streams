@@ -1,8 +1,8 @@
-import Parser from 'm3u8-parser';
+import { Parser } from 'm3u8-parser';
 
 import { YoutubeConfig } from './Config';
 import { YoutubeVideoFormat } from '../classes';
-import { inspect } from 'util';
+
 import { formats } from './Formats';
 
 const videoRegex = /^[\w-]{11}$/;
@@ -62,7 +62,7 @@ export class Util extends null {
                 throw new Error('No response body');
             }
 
-            var parser = new Parser.Parser();
+            var parser = new Parser();
 
             parser.push(TxtResp);
             parser.end();
