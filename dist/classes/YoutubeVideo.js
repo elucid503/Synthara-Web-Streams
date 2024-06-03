@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.YoutubeVideo = void 0;
-const https_1 = __importDefault(require("https"));
 const axios_1 = __importDefault(require("axios"));
 const m3u8stream_1 = __importDefault(require("m3u8stream"));
 const stream_1 = require("stream");
@@ -24,11 +23,12 @@ const util_1 = require("../util");
 const functions_1 = require("../functions");
 const https_proxy_agent_1 = require("https-proxy-agent");
 class YoutubeVideo {
-    constructor(json) {
+    constructor(json, liveFormats = []) {
         var _a, _b, _c, _d;
         this.liveFormats = [];
         this.normalFormats = [];
         this.json = json;
+        this.liveFormats = liveFormats;
         this.addFormats([...((_b = (_a = json.streamingData) === null || _a === void 0 ? void 0 : _a.formats) !== null && _b !== void 0 ? _b : []), ...((_d = (_c = json.streamingData) === null || _c === void 0 ? void 0 : _c.adaptiveFormats) !== null && _d !== void 0 ? _d : [])]);
     }
     get url() {
@@ -114,10 +114,7 @@ class YoutubeVideo {
                             range: `bytes=${startBytes}-${endBytes >= format.contentLength ? '' : endBytes}`,
                             referer: 'https://www.youtube.com/'
                         },
-                        proxy: Proxy ? { host: Proxy.Host, port: Proxy.Port } : false,
-                        httpsAgent: new https_1.default.Agent({
-                            rejectUnauthorized: false
-                        })
+                        httpsAgent: Proxy ? new https_proxy_agent_1.HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : false,
                     });
                     if (response.status[0] !== 2) {
                         if (response.status === 403 && remainRetry > 0) {

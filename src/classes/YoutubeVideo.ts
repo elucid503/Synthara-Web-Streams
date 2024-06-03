@@ -1,5 +1,3 @@
-import https from 'https';
-
 import Axios from 'axios';
 
 import m3u8stream from 'm3u8stream';
@@ -14,6 +12,7 @@ import { formats as FormatStructs } from '../util/Formats';
 import { Util, YoutubeConfig } from '../util';
 
 import { Download } from '../functions';
+
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
 export interface YoutubeVideoDetails {
@@ -211,10 +210,7 @@ export class YoutubeVideo {
                             }`,
                             referer: 'https://www.youtube.com/'
                         },
-                        proxy: Proxy ? { host: Proxy.Host, port: Proxy.Port } : false,
-                        httpsAgent: new https.Agent({  
-                            rejectUnauthorized: false
-                        })
+                        httpsAgent: Proxy ? new HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : false,
                     });
 
                     if (response.status[0] !== 2) {

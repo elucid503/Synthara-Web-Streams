@@ -77,7 +77,7 @@ export declare class YoutubeVideo {
     json: any;
     liveFormats: YoutubeVideoFormat[];
     normalFormats: YoutubeVideoFormat[];
-    constructor(json: any);
+    constructor(json: any, liveFormats?: YoutubeVideoFormat[]);
     get url(): string;
     get details(): YoutubeVideoDetails;
     get formats(): YoutubeVideoFormat[];

@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetVideo = void 0;
-const https_1 = __importDefault(require("https"));
+const https_proxy_agent_1 = require("https-proxy-agent");
 const axios_1 = __importDefault(require("axios"));
 const classes_1 = require("../classes");
 const util_1 = require("../util");
@@ -42,10 +42,7 @@ function GetVideo(URLorID_1) {
                     }
                 }
             },
-            proxy: Proxy ? { host: Proxy.Host, port: Proxy.Port } : undefined,
-            httpsAgent: new https_1.default.Agent({
-                rejectUnauthorized: false
-            })
+            httpsAgent: Proxy ? new https_proxy_agent_1.HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : undefined,
         });
         const json = (yield response.data);
         if (((_a = json.playabilityStatus) === null || _a === void 0 ? void 0 : _a.status) === 'ERROR') {

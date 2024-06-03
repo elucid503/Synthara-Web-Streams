@@ -9,14 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const classes_1 = require("./classes");
 const functions_1 = require("./functions");
 function Main() {
     return __awaiter(this, void 0, void 0, function* () {
-        let url = 'https://www.youtube.com/watch?v=XDMg06hw97U';
-        console.time('Time taken to fetch video info');
+        const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
         const info = yield (0, functions_1.GetVideo)(url, true);
-        console.log(info);
-        const format = info.formats.filter((f) => !f.hasVideo && f.hasAudio && f.isHLS);
+        const NewVideo = new classes_1.YoutubeVideo(info.json, info.liveFormats);
+        const format = NewVideo.formats.filter((f) => !f.hasVideo && f.hasAudio && f.isHLS);
         console.log(format);
     });
 }
