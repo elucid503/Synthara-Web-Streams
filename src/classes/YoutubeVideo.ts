@@ -140,7 +140,7 @@ export class YoutubeVideo {
     Download(
         formatFilter: (f: YoutubeVideoFormat) => boolean,
         options: DownloadOptions = {},
-        Proxy?: { Host: string; Port: number }
+        Proxy?: { Host: string; Port: number, UserPass?: string }
     ): m3u8stream.Stream | PassThrough {
         // This format filter is playable video or audio.
         const playableFormats = this.formats.filter((f) => f.isHLS || (f.contentLength && (f.hasVideo || f.hasAudio)));
@@ -163,7 +163,7 @@ export class YoutubeVideo {
                     maxReconnects: Infinity,
                     maxRetries: 10,
                     backoff: { inc: 20, max: 100 },
-                    agent: Proxy ? new HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : undefined,
+                    agent: Proxy ? new HttpsProxyAgent(`http://${Proxy.UserPass ? Proxy.UserPass + '@' : ''}${Proxy.Host}:${Proxy.Port}`) : undefined
                 }
             });
 
@@ -210,7 +210,7 @@ export class YoutubeVideo {
                             }`,
                             referer: 'https://www.youtube.com/'
                         },
-                        httpsAgent: Proxy ? new HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : false,
+                        httpsAgent: Proxy ? new HttpsProxyAgent(`http://${Proxy.UserPass ? Proxy.UserPass + '@' : ''}${Proxy.Host}:${Proxy.Port}`) : undefined
                     });
 
                     if (response.status[0] !== 2) {

@@ -10,7 +10,7 @@ import { Util, YoutubeConfig } from '../util';
 export async function GetVideo(
     URLorID: string,
     GetHLSFormats: boolean = false,
-    Proxy?: { Host: string; Port: number }
+    Proxy?: { Host: string; Port: number, UserPass?: string }
 ): Promise<YoutubeVideo> {
     const videoId = Util.getVideoId(URLorID);
     if (!videoId) {
@@ -35,7 +35,7 @@ export async function GetVideo(
                 }
             }
         },
-        httpsAgent: Proxy ? new HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : undefined,
+        httpsAgent: Proxy ? new HttpsProxyAgent(`http://${Proxy.UserPass ? Proxy.UserPass + '@' : ''}${Proxy.Host}:${Proxy.Port}`) : undefined
     });
 
     const json = (await response.data) as any;

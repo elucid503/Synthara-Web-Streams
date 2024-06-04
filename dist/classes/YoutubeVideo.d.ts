@@ -84,6 +84,7 @@ export declare class YoutubeVideo {
     Download(formatFilter: (f: YoutubeVideoFormat) => boolean, options?: DownloadOptions, Proxy?: {
         Host: string;
         Port: number;
+        UserPass?: string;
     }): m3u8stream.Stream | PassThrough;
     private addFormats;
 }

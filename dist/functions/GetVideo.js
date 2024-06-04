@@ -42,7 +42,7 @@ function GetVideo(URLorID_1) {
                     }
                 }
             },
-            httpsAgent: Proxy ? new https_proxy_agent_1.HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : undefined,
+            httpsAgent: Proxy ? new https_proxy_agent_1.HttpsProxyAgent(`http://${Proxy.UserPass ? Proxy.UserPass + '@' : ''}${Proxy.Host}:${Proxy.Port}`) : undefined
         });
         const json = (yield response.data);
         if (((_a = json.playabilityStatus) === null || _a === void 0 ? void 0 : _a.status) === 'ERROR') {

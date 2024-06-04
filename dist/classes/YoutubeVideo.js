@@ -80,7 +80,7 @@ class YoutubeVideo {
                     maxReconnects: Infinity,
                     maxRetries: 10,
                     backoff: { inc: 20, max: 100 },
-                    agent: Proxy ? new https_proxy_agent_1.HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : undefined,
+                    agent: Proxy ? new https_proxy_agent_1.HttpsProxyAgent(`http://${Proxy.UserPass ? Proxy.UserPass + '@' : ''}${Proxy.Host}:${Proxy.Port}`) : undefined
                 }
             });
             stream.once('close', () => {
@@ -114,7 +114,7 @@ class YoutubeVideo {
                             range: `bytes=${startBytes}-${endBytes >= format.contentLength ? '' : endBytes}`,
                             referer: 'https://www.youtube.com/'
                         },
-                        httpsAgent: Proxy ? new https_proxy_agent_1.HttpsProxyAgent(`http://${Proxy.Host}:${Proxy.Port}`) : false,
+                        httpsAgent: Proxy ? new https_proxy_agent_1.HttpsProxyAgent(`http://${Proxy.UserPass ? Proxy.UserPass + '@' : ''}${Proxy.Host}:${Proxy.Port}`) : undefined
                     });
                     if (response.status[0] !== 2) {
                         if (response.status === 403 && remainRetry > 0) {

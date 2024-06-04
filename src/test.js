@@ -1,17 +1,15 @@
-const { GetVideo, YoutubeVideo } = require('../dist/index.js');
+const { GetVideo } = require('../dist/index.js');
 
 async function Main() {
 
     const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 
-    const info = await GetVideo(url, true, { Host: "181.177.65.138", Port: 3199 });
+    console.time('GetVideo');
+
+    const info = await GetVideo(url, true, { Host: "195.178.142.76", Port: 12323, UserPass: "14ae615cd92ce:160911818e" });
     
-    const NewVideo = new YoutubeVideo(info.json, info.liveFormats);
-
-    const format = (NewVideo.formats).concat(NewVideo.liveFormats).filter((f) => !f.hasVideo && f.hasAudio && f.isHLS);
-
-    console.log(format);
-
+    console.timeEnd('GetVideo');
+    
 }
 
 setTimeout(Main, 1000);
