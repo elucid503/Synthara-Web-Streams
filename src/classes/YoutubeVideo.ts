@@ -160,7 +160,7 @@ export class YoutubeVideo {
                 begin: options.begin ?? (format.isLive ? Date.now() : 0),
                 liveBuffer: options.liveBuffer ?? 4000,
                 requestOptions: {
-                    maxReconnects: Infinity,
+                    maxReconnects: 10,
                     maxRetries: 10,
                     backoff: { inc: 20, max: 100 },
                     agent: Proxy ? new HttpsProxyAgent(`http://${Proxy.UserPass ? Proxy.UserPass + '@' : ''}${Proxy.Host}:${Proxy.Port}`) : undefined

@@ -15,7 +15,7 @@ export class YoutubeConfig extends null {
             userAgent: 'com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)'
         }
     };
-    static STS = 0;
+    static STS = 0;   
     static PLAYER_JS_URL = '';
     static PLAYER_TOKENS: string[] | null = null;
 
